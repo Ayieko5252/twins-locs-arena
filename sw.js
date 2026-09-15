@@ -1,5 +1,5 @@
 // Network first, so updates show straight away; falls back to the cached copy when offline.
-const CACHE = 'tla-v2';
+const CACHE = 'tla-v3';
 const SHELL = ['/', '/index.html', '/manifest.webmanifest', '/icons/icon-192.png', '/icons/icon-512.png'];
 
 self.addEventListener('install', e => {
@@ -21,6 +21,7 @@ self.addEventListener('fetch', e => {
   const sameOrigin = url.origin === self.location.origin;
   const fonts = url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com';
   if (!sameOrigin && !fonts) return;
+  if (sameOrigin && url.pathname.startsWith('/admin')) return; // never cache staff pages
 
   e.respondWith(
     fetch(req)

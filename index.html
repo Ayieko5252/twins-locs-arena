@@ -487,7 +487,6 @@ td .sub{display:block;font-size:.8rem;color:var(--muted)}
       </nav>
       <div class="nav-actions">
         <button class="btn ghost sm" data-action="open-cart">Bag <span class="bag-count num" id="bagCount">0</span></button>
-        <button class="btn sm" data-action="go-admin">Admin</button>
       </div>
       <a class="btn ghost sm nav-call" href="#visit">Visit us</a>
     </div>
@@ -630,6 +629,7 @@ td .sub{display:block;font-size:.8rem;color:var(--muted)}
     <span class="brand">Twins Locs Arena <small>Admin</small></span>
     <button data-tab="settings" id="aBarSettings" aria-label="Settings"><svg class="ic" viewBox="0 0 24 24"><path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/></svg></button>
     <button data-action="go-store">Store</button>
+    <button data-action="sign-out" aria-label="Sign out"><svg class="ic" viewBox="0 0 24 24"><path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 17l5-5-5-5M15 12H4"/></svg></button>
   </header>
   <div class="admin">
     <aside class="side">
@@ -640,6 +640,7 @@ td .sub{display:block;font-size:.8rem;color:var(--muted)}
         <p>Your changes are saved in this browser. Connect a backend before you launch.</p>
         <button class="btn ghost sm" data-action="go-store">View store</button>
         <button class="btn ghost sm" data-action="reset">Reset sample data</button>
+        <button class="btn ghost sm" data-action="sign-out">Sign out</button>
       </div>
     </aside>
     <main class="a-main" id="adminMain"></main>
@@ -666,6 +667,8 @@ const today = () => iso(new Date());
 const uid = p => `TLA-${p}${Math.floor(1000+Math.random()*9000)}`;
 const fmtDate = s => new Date(s+'T00:00').toLocaleDateString(undefined,{weekday:'short',day:'numeric',month:'short'});
 const tel = p => `<a class="tel" href="tel:${esc(String(p).replace(/[^\d+]/g,''))}">${esc(p)}</a>`;
+const LOCAL = location.protocol==='file:' || ['localhost','127.0.0.1'].includes(location.hostname);
+const IS_ADMIN_URL = /^\/admin\/?$/.test(location.pathname);
 const isPhone = () => matchMedia('(max-width:760px)').matches;
 
 /* ---------- data ---------- */
@@ -1022,7 +1025,7 @@ function renderAdmin(){
       <div class="panel only-phone">
         <h3>This device</h3>
         <p class="hint">Changes are saved in this browser only. Connect a backend before you launch.</p>
-        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px"><button class="btn ghost sm" data-action="go-store">View store</button><button class="btn ghost sm" data-action="reset">Reset sample data</button></div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px"><button class="btn ghost sm" data-action="go-store">View store</button><button class="btn ghost sm" data-action="reset">Reset sample data</button><button class="btn ghost sm" data-action="sign-out">Sign out</button></div>
       </div>`;
   }
 }
@@ -1105,8 +1108,9 @@ document.addEventListener('click', e=>{
     case 'open-cart': openCart(); break;
     case 'close-cart': closeCart(); break;
     case 'close-dlg': t.closest('dialog').close(); break;
-    case 'go-admin': show('admin'); break;
-    case 'go-store': show('store'); break;
+    case 'go-admin': if(LOCAL) show('admin'); else location.href='/admin'; break;
+    case 'go-store': if(IS_ADMIN_URL) location.href='/'; else show('store'); break;
+    case 'sign-out': if(LOCAL) show('store'); else location.href='/admin/logout'; break;
     case 'add': {
       const p=S.products.find(x=>x.id===id), c=S.cart.find(x=>x.id===id);
       if(c){ if(c.qty>=p.stock){ toast(`Only ${p.stock} in stock`); break; } c.qty++; } else S.cart.push({id,qty:1});
@@ -1184,8 +1188,9 @@ document.querySelectorAll('dialog').forEach(d=>d.addEventListener('click', e=>{ 
 /* re-render admin cards when rotating between phone and desktop widths */
 matchMedia('(max-width:760px)').addEventListener?.('change', ()=>{ if(!$('#adminView').hidden) renderAdmin(); });
 
-show('store');
-if(location.hash==='#book') openBooking();
+/* Admin lives at /admin, which Netlify only serves after staff sign-in (netlify/edge-functions/admin-auth.js).
+   Opening the file locally (or on localhost) skips sign-in for testing. */
+if(IS_ADMIN_URL) show('admin'); else { show('store'); if(location.hash==='#book') openBooking(); }
 
 /* installable app (phone home screen, or Windows via Edge/Chrome) */
 if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('/sw.js').catch(()=>{});

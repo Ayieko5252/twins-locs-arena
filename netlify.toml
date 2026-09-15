@@ -16,3 +16,9 @@
   for = "/manifest.webmanifest"
   [headers.values]
     Content-Type = "application/manifest+json"
+
+# Admin page is the same app, served at /admin after sign-in (see netlify/edge-functions/admin-auth.js)
+[[redirects]]
+  from = "/admin"
+  to = "/index.html"
+  status = 200
