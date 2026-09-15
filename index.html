@@ -468,6 +468,29 @@ td .sub{display:block;font-size:.8rem;color:var(--muted)}
   .face .btn{padding:.5em .8em;font-size:.8rem}
   .grid{gap:10px}
 }
+.hp{position:absolute!important;left:-9999px;width:1px;height:1px;opacity:0;pointer-events:none}
+.btn.wa{background:#25D366;border-color:#25D366;color:#0B2B17}
+.btn.wa .ic{width:20px;height:20px}
+.done{max-width:520px;margin:0 auto;width:100%}
+.done-top{display:flex;justify-content:space-between;align-items:center}
+.done h2{font-size:clamp(1.6rem,4vw,2rem)}
+.done-ref{font-size:.92rem;color:var(--ink-2)}
+.done-ref .mono{font-size:1rem;font-weight:500;color:var(--ink);background:var(--gold-soft);padding:.1em .5em;border-radius:6px;margin-left:4px}
+.done-list{margin:0;display:grid;grid-template-columns:auto 1fr;gap:8px 18px;padding:14px 0;border-top:1px dashed var(--line-strong);border-bottom:1px dashed var(--line-strong)}
+.done-list dt{font-size:.8rem;font-weight:700;color:var(--muted);letter-spacing:.04em;padding-top:1px}
+.done-list dd{margin:0}
+#doneDlg{width:min(560px,calc(100% - 24px))}
+.a-actions{display:flex;gap:8px;flex-wrap:wrap}
+.notice{grid-template-columns:1fr auto;align-items:center;gap:12px 18px;background:var(--gold-soft)}
+@media (max-width:760px){.notice{grid-template-columns:1fr}.notice .btn{justify-self:start}}
+.alert-rows{display:grid}
+.alert-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
+.alert-row:last-child{border-bottom:0}
+.alert-row .hint{display:block}
+.tag.ok{background:var(--ok-bg);color:var(--ok)}
+.alerts{display:block;font-size:.74rem;color:var(--ok);font-weight:600;margin-top:2px}
+.alerts.bad{color:var(--bad)}
+.new-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--gold);margin-right:6px;vertical-align:middle}
 @keyframes sheet-up{from{transform:translateY(40px);opacity:.6}to{transform:none;opacity:1}}
 @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
 </style>
@@ -611,6 +634,7 @@ td .sub{display:block;font-size:.8rem;color:var(--muted)}
     </div>
     <div class="dlg-side">
       <span class="eyebrow">Your details</span>
+      <input class="hp" name="website" id="bWebsite" tabindex="-1" autocomplete="off" aria-hidden="true">
       <div class="field"><label for="bName">Name</label><input id="bName" autocomplete="name" required></div>
       <div class="field"><label for="bPhone">Phone</label><input id="bPhone" type="tel" inputmode="tel" autocomplete="tel" required></div>
       <div class="sum num" id="bSum"></div>
@@ -621,6 +645,11 @@ td .sub{display:block;font-size:.8rem;color:var(--muted)}
       </div>
     </div>
   </form>
+</dialog>
+
+<!-- confirmation after booking or order -->
+<dialog id="doneDlg" aria-label="Confirmation">
+  <div class="dlg-main done" id="doneBody"></div>
 </dialog>
 
 <!-- ============ ADMIN ============ -->
@@ -637,9 +666,8 @@ td .sub{display:block;font-size:.8rem;color:var(--muted)}
       <span class="brand">Twins Locs Arena</span>
       <nav class="tabs" id="tabs" aria-label="Admin sections"></nav>
       <div class="side-foot">
-        <p>Your changes are saved in this browser. Connect a backend before you launch.</p>
+        <p>Bookings and orders are saved online and checked every minute.</p>
         <button class="btn ghost sm" data-action="go-store">View store</button>
-        <button class="btn ghost sm" data-action="reset">Reset sample data</button>
         <button class="btn ghost sm" data-action="sign-out">Sign out</button>
       </div>
     </aside>
@@ -657,84 +685,52 @@ td .sub{display:block;font-size:.8rem;color:var(--muted)}
 
 <script>
 (() => {
-const KEY = 'tla-store-v1';
+const CATALOG_KEY = 'tla-catalog-v1', CART_KEY = 'tla-cart-v1', TAB_KEY = 'tla-admin-tab';
 const $ = s => document.querySelector(s);
 const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const pad = n => String(n).padStart(2,'0');
 const iso = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
 const addDays = (d,n) => { const x = new Date(d); x.setDate(x.getDate()+n); return x; };
 const today = () => iso(new Date());
-const uid = p => `TLA-${p}${Math.floor(1000+Math.random()*9000)}`;
 const fmtDate = s => new Date(s+'T00:00').toLocaleDateString(undefined,{weekday:'short',day:'numeric',month:'short'});
-const tel = p => `<a class="tel" href="tel:${esc(String(p).replace(/[^\d+]/g,''))}">${esc(p)}</a>`;
-const LOCAL = location.protocol==='file:' || ['localhost','127.0.0.1'].includes(location.hostname);
-const IS_ADMIN_URL = /^\/admin\/?$/.test(location.pathname);
+const digits = p => String(p||'').replace(/[^\d+]/g,'');
+const tel = p => `<a class="tel" href="tel:${esc(digits(p))}">${esc(p)}</a>`;
 const isPhone = () => matchMedia('(max-width:760px)').matches;
+const IS_ADMIN_URL = /^\/admin\/?$/.test(location.pathname);
+const readLS = k => { try { return JSON.parse(localStorage.getItem(k)); } catch(e){ return null; } };
+const writeLS = (k,v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} };
 
 /* ---------- data ---------- */
-function seed(){
-  const d = o => iso(addDays(new Date(), o));
-  const services = [
-    {id:'s1',cat:'Start',name:'Starter locs',price:3500,dur:'3–4 hrs',desc:'Comb coils or two-strand twists on natural hair, sized to how you want your locs to look.',care:'First retwist in 4 weeks'},
-    {id:'s2',cat:'Start',name:'Instant locs',price:8000,dur:'5–7 hrs',desc:'Fully formed locs in one session using the crochet method. No budding stage.',care:'Low-maintenance from day one'},
-    {id:'s3',cat:'Start',name:'Microlocs installation',price:18000,dur:'2 sessions',desc:'Small, uniform locs set with a grid pattern. We do a consultation first.',care:'Interlock every 6–8 wks'},
-    {id:'s4',cat:'Maintain',name:'Retwist & style',price:1500,dur:'2 hrs',desc:'Palm-roll retwist of new growth with a light gel, finished with a simple style.',care:'Every 4–6 wks'},
-    {id:'s5',cat:'Maintain',name:'Interlocking maintenance',price:2000,dur:'2–3 hrs',desc:'Tool-pulled roots that hold longer than a retwist. Good for active lifestyles.',care:'Every 6–8 wks'},
-    {id:'s6',cat:'Maintain',name:'Loc detox',price:1200,dur:'1.5 hrs',desc:'Apple cider vinegar and baking soda soak to lift build-up and lint, then a deep rinse.',care:'Every 3 months'},
-    {id:'s7',cat:'Repair',name:'Loc repair & reattachment',price:800,dur:'1 hr',desc:'Fixes thinning points and reattaches broken locs. Price is per 10 locs.',care:'As needed'},
-    {id:'s8',cat:'Repair',name:'Loc extensions',price:12000,dur:'6–8 hrs',desc:'Human-hair extensions added to your locs for length or fullness. Price covers 50 locs.',care:'Retwist every 4–6 wks'},
-    {id:'s9',cat:'Style',name:'Barrel twists or petals',price:1000,dur:'1.5 hrs',desc:'Barrel rolls, petal buns or a loc updo for events. Includes finishing with gold cuffs.',care:'Lasts 1–2 wks'},
-    {id:'s10',cat:'Style',name:'Loc bob & colour',price:4500,dur:'3 hrs',desc:'Shaping cut plus semi-permanent colour on the ends or all over.',care:'Colour refresh in 8 wks'}
-  ];
-  const products = [
-    {id:'p1',cat:'Moisturise',kind:'bottle',name:'Rosewater & Aloe Loc Spritz',size:'250 ml',price:850,stock:24,desc:'Light daily mist that won’t leave residue.'},
-    {id:'p2',cat:'Cleanse',kind:'bottle',name:'Residue-Free Clarifying Shampoo',size:'300 ml',price:1200,stock:3,desc:'Rinses clean out of the centre of each loc.'},
-    {id:'p3',cat:'Hold',kind:'jar',name:'Aloe Locking Gel',size:'200 g',price:700,stock:31,desc:'Flake-free hold for retwists.'},
-    {id:'p4',cat:'Moisturise',kind:'bottle',name:'Jamaican Black Castor Oil',size:'120 ml',price:950,stock:12,desc:'For scalp and new growth only.'},
-    {id:'p5',cat:'Accessories',kind:'beads',name:'Gold Loc Cuffs',size:'Set of 20',price:600,stock:45,desc:'Adjustable cuffs for locs up to 8 mm thick.'},
-    {id:'p6',cat:'Accessories',kind:'bonnet',name:'Satin-Lined Loc Sock',size:'One size, long',price:900,stock:0,desc:'Protects locs from lint and frizz overnight.'},
-    {id:'p7',cat:'Accessories',kind:'hook',name:'Interlocking Tool Set',size:'3 sizes',price:750,stock:9,desc:'Latch tools for micro, medium and thick locs.'},
-    {id:'p8',cat:'Cleanse',kind:'box',name:'At-Home Loc Detox Kit',size:'2 soaks',price:1800,stock:6,desc:'ACV rinse, clarifying wash and a microfibre towel.'}
-  ];
-  const bk = (id,name,phone,sid,day,time,status,notes='') => {const s=services.find(x=>x.id===sid);return {id,name,phone,serviceId:sid,service:s.name,price:s.price,date:d(day),time,status,notes};};
-  const bookings = [
-    bk('TLA-B1042','Amani K.','0712 000 111','s4',0,'09:00','confirmed','~80 locs, shoulder-length'),
-    bk('TLA-B1043','Brian O.','0722 000 222','s5',0,'11:00','confirmed','Interlocked, last done 7 wks ago'),
-    bk('TLA-B1044','Faith N.','0733 000 333','s1',0,'14:00','pending','Wants medium comb coils'),
-    bk('TLA-B1045','Tasha W.','0701 000 444','s9',1,'10:00','pending','Wedding on Saturday'),
-    bk('TLA-B1046','Kevin M.','0711 000 555','s6',2,'13:00','confirmed'),
-    bk('TLA-B1039','Achieng O.','0799 000 666','s8',-1,'09:00','done'),
-    bk('TLA-B1037','Lulu A.','0708 000 777','s4',-2,'15:00','done'),
-    bk('TLA-B1035','Sam G.','0745 000 888','s2',-4,'08:00','done'),
-    bk('TLA-B1034','Joy E.','0756 000 999','s7',-5,'12:00','cancelled'),
-    bk('TLA-B1031','Dan K.','0767 000 123','s5',-6,'10:00','done')
-  ];
-  const od = (id,name,phone,items,day,status,ful) => {
-    const lines = items.map(([pid,qty])=>{const p=products.find(x=>x.id===pid);return {productId:pid,name:p.name,qty,price:p.price};});
-    const sub = lines.reduce((a,l)=>a+l.qty*l.price,0); const del = ful==='delivery' && sub<5000 ? 300 : 0;
-    return {id,name,phone,items:lines,subtotal:sub,delivery:del,total:sub+del,fulfilment:ful,address:ful==='delivery'?'Sample address':'',date:d(day),status};
-  };
-  const orders = [
-    od('TLA-O2210','Grace M.','0712 111 000',[['p1',2],['p3',1]],0,'new','delivery'),
-    od('TLA-O2209','Otieno P.','0722 111 000',[['p8',1]],0,'packed','pickup'),
-    od('TLA-O2207','Mercy W.','0733 111 000',[['p5',3],['p2',1]],-1,'dispatched','delivery'),
-    od('TLA-O2204','Ian N.','0744 111 000',[['p6',2],['p4',1]],-3,'completed','pickup'),
-    od('TLA-O2201','Zawadi K.','0755 111 000',[['p2',2],['p1',1],['p7',1]],-5,'completed','delivery')
-  ];
-  return {
-    sample:true, services, products, bookings, orders, cart:[],
-    settings:{name:'Twins Locs Arena',tagline:'Enjoy the beauty in locs',currency:'KSh',depositPct:30,deliveryFee:300,freeOver:5000,chairs:2,open:8,close:18,
-      phone:'Add your phone number in Admin → Settings',address:'Add your salon address in Admin → Settings',hours:'Mon–Sat, 8:00–18:00 · Sun by appointment'}
-  };
-}
-function load(){ try { const r = localStorage.getItem(KEY); return r ? JSON.parse(r) : null; } catch(e){ return null; } }
-let S = load() || seed();
-function save(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e){ toast('Couldn’t save. Browser storage is full or blocked, so try a smaller image.'); } }
+const S = {
+  services:[], products:[], taken:{}, bookings:[], orders:[], channels:{}, loaded:false,
+  settings:{name:'Twins Locs Arena',tagline:'Enjoy the beauty in locs',currency:'KSh',depositPct:30,deliveryFee:300,freeOver:5000,chairs:2,open:8,close:18,whatsapp:'',phone:'',address:'',hours:'',timezone:'Africa/Nairobi'}
+};
+const cachedCatalog = readLS(CATALOG_KEY);
+if(cachedCatalog) Object.assign(S, cachedCatalog);
+let cart = readLS(CART_KEY) || [];
+const saveCart = () => writeLS(CART_KEY, cart);
 const money = n => `${S.settings.currency} ${Number(n||0).toLocaleString()}`;
+
+async function api(path, {method='GET', body}={}){
+  let res;
+  try {
+    res = await fetch('/api/'+path, {method, credentials:'same-origin', headers: body ? {'Content-Type':'application/json'} : {}, body: body ? JSON.stringify(body) : undefined});
+  } catch(e){ throw new Error('No connection. Check your internet and try again.'); }
+  let data = {};
+  try { data = await res.json(); } catch(e){}
+  if(res.status===401 && path.startsWith('admin')){ location.href='/admin/login'; throw new Error(data.error || 'Sign in again.'); }
+  if(!res.ok) throw new Error(data.error || `Something went wrong (${res.status}). Try again.`);
+  return data;
+}
 
 /* ---------- ui helpers ---------- */
 let toastT;
-function toast(msg){ const t=$('#toast'); t.textContent=msg; t.hidden=false; clearTimeout(toastT); toastT=setTimeout(()=>t.hidden=true,3200); }
+function toast(msg){ const t=$('#toast'); t.textContent=msg; t.hidden=false; clearTimeout(toastT); toastT=setTimeout(()=>t.hidden=true,3600); }
+async function busy(btn, label, fn){
+  const old = btn ? btn.textContent : '';
+  if(btn){ btn.disabled = true; btn.textContent = label; }
+  try { return await fn(); } finally { if(btn){ btn.disabled = false; btn.textContent = old; } }
+}
 
 function strandSVG(len, beads=[]){
   const seg=16, n=Math.floor(len/seg); let s='';
@@ -754,15 +750,20 @@ function art(kind){
   };
   return `<svg viewBox="0 0 100 110" aria-hidden="true">${a[kind]||a.jar}</svg>`;
 }
-const pic = p => p.img ? `<img src="${p.img}" alt="">` : art(p.kind);
+const pic = p => p.img ? `<img src="${esc(p.img)}" alt="" loading="lazy">` : art(p.kind);
 const ICON = {
   overview:'<path d="M4 20V11M10 20V5M16 20v-6M21 20H3"/>',
   bookings:'<rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/>',
   orders:'<path d="M3.5 7.5 12 3.5l8.5 4-8.5 4z"/><path d="M3.5 7.5v9l8.5 4 8.5-4v-9M12 11.5v9"/>',
   products:'<path d="M3.5 12.5V4h8.5l9 9-8.5 8.5z"/><circle cx="8" cy="8.5" r="1.5"/>',
-  services:'<path d="M4 4h16v5H4zM6.5 9v11M10 9v11M13.5 9v8M17 9v11"/>'
+  services:'<path d="M4 4h16v5H4zM6.5 9v11M10 9v11M13.5 9v8M17 9v11"/>',
+  whatsapp:'<path d="M4 20l1.2-3.6A8 8 0 1 1 8 19.1z"/><path d="M9 9.5c.3 2.2 2.3 4.2 4.5 4.6l1-1.1 1.8.8-.3 1.5c-3.8.3-7.5-3.4-7.2-7.2l1.5-.3.8 1.8z"/>'
 };
 const icon = k => `<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">${ICON[k]}</svg>`;
+function waLink(text){
+  const n = String(S.settings.whatsapp||'').replace(/\D/g,'');
+  return n ? `https://wa.me/${n}?text=${encodeURIComponent(text)}` : '';
+}
 
 /* ---------- storefront ---------- */
 let svcCat='All', shopCat='All';
@@ -770,7 +771,7 @@ function slotsFor(date){
   const {open,close,chairs} = S.settings, out=[], now=new Date();
   for(let h=+open; h<+close; h++){
     const t=`${pad(h)}:00`;
-    const taken = S.bookings.filter(b=>b.date===date && b.time===t && b.status!=='cancelled').length;
+    const taken = S.taken[`${date} ${t}`] || 0;
     const past = date===today() && h<=now.getHours();
     out.push({t, free: taken < chairs && !past && date>=today()});
   }
@@ -784,9 +785,15 @@ function renderStore(){
   const st=S.settings;
   document.querySelectorAll('[data-strand]').forEach(el=>{ el.innerHTML=strandSVG(+el.dataset.len,(el.dataset.beads||'').split(',').map(Number)); });
   $('#tagline').textContent = st.tagline;
-  document.title = st.name;
+  document.title = IS_ADMIN_URL ? `Admin · ${st.name}` : st.name;
   $('#footName').textContent = `© ${new Date().getFullYear()} ${st.name}`;
   $('#depPctTxt').textContent = `${st.depositPct}%`;
+  if(!S.services.length){
+    $('#nextSlot').textContent = 'Loading open times…';
+    $('#menu').innerHTML = '<p class="empty">Loading the loc menu…</p>';
+    $('#products').innerHTML = '<p class="empty">Loading products…</p>';
+    renderCart(); return;
+  }
   const n = nextOpen();
   $('#nextSlot').innerHTML = n ? `Next open chair: <strong>${n.d===today()?'Today':fmtDate(n.d)}, ${n.t}</strong>` : 'Fully booked for the next three weeks';
   $('#miniShelf').innerHTML = S.products.filter(p=>p.stock>0).slice(0,3).map(p=>`<div class="mini" title="${esc(p.name)}">${pic(p)}</div>`).join('');
@@ -799,7 +806,7 @@ function renderStore(){
     <div class="m-row">
       <div class="m-top"><span class="m-name">${esc(s.name)}</span><span class="m-lead"></span><span class="m-price num"><small>from</small>${money(s.price)}</span></div>
       <p class="m-desc">${esc(s.desc)}</p>
-      <div class="m-foot"><span>${esc(s.dur)}</span>${s.care?`<span class="dot"></span><span>${esc(s.care)}</span>`:''}<button class="link-btn" data-action="book" data-id="${s.id}">Book this</button></div>
+      <div class="m-foot"><span>${esc(s.dur)}</span>${s.care?`<span class="dot"></span><span>${esc(s.care)}</span>`:''}<button class="link-btn" data-action="book" data-id="${esc(s.id)}">Book this</button></div>
     </div>`).join('') || '<p class="empty">No services in this category yet.</p>';
 
   const pc=['All',...new Set(S.products.map(p=>p.cat))];
@@ -812,13 +819,26 @@ function renderStore(){
         <h3 class="p-name">${esc(p.name)}</h3>
         <span class="p-size">${esc(p.size)}${p.desc?`<span class="p-desc"> · ${esc(p.desc)}</span>`:''}</span>
         <div class="p-row"><span class="p-price num">${money(p.price)}</span>
-          <button class="btn sm" data-action="add" data-id="${p.id}" ${p.stock===0?'disabled':''}>${p.stock===0?'Sold out':'Add to bag'}</button></div>
+          <button class="btn sm" data-action="add" data-id="${esc(p.id)}" ${p.stock===0?'disabled':''}>${p.stock===0?'Sold out':'Add to bag'}</button></div>
       </div>
     </article>`).join('');
 
   const phoneLine = /\d/.test(st.phone) ? tel(st.phone) : esc(st.phone);
-  $('#visitInfo').innerHTML = `<dt>Hours</dt><dd>${esc(st.hours)}</dd><dt>Where</dt><dd>${esc(st.address)}</dd><dt>Call</dt><dd>${phoneLine}</dd><dt>Chairs</dt><dd>${st.chairs} locticians working at once</dd>`;
+  const wa = waLink(`Hi ${st.name}, I have a question about locs.`);
+  $('#visitInfo').innerHTML = `<dt>Hours</dt><dd>${esc(st.hours)}</dd><dt>Where</dt><dd>${esc(st.address)}</dd><dt>Call</dt><dd>${phoneLine}</dd>${wa?`<dt>WhatsApp</dt><dd><a class="tel" href="${esc(wa)}" target="_blank" rel="noopener">Chat with us</a></dd>`:''}<dt>Chairs</dt><dd>${st.chairs} locticians working at once</dd>`;
   renderCart();
+}
+async function loadCatalog(quiet){
+  try {
+    const c = await api('catalog');
+    Object.assign(S, {services:c.services, products:c.products, settings:c.settings, taken:c.taken});
+    writeLS(CATALOG_KEY, {services:c.services, products:c.products, settings:c.settings});
+    cart = cart.filter(x=>S.products.some(p=>p.id===x.id));
+    renderStore();
+  } catch(e){
+    if(!S.services.length){ $('#menu').innerHTML = `<p class="err">${esc(e.message)}</p>`; $('#products').innerHTML = ''; }
+    if(!quiet) toast(e.message);
+  }
 }
 
 /* phone tab bar: highlight the section in view */
@@ -831,7 +851,7 @@ const navObs = 'IntersectionObserver' in window ? new IntersectionObserver(entri
 if(navObs) ['home','services','shop','how','visit'].forEach(id=>navObs.observe(document.getElementById(id)));
 
 /* cart */
-function cartLines(){ return S.cart.map(c=>({...c,p:S.products.find(p=>p.id===c.id)})).filter(c=>c.p); }
+function cartLines(){ return cart.map(c=>({...c,p:S.products.find(p=>p.id===c.id)})).filter(c=>c.p); }
 function cartTotals(ful){
   const sub = cartLines().reduce((a,c)=>a+c.qty*c.p.price,0);
   const del = ful==='delivery' && sub>0 && sub < S.settings.freeOver ? +S.settings.deliveryFee : 0;
@@ -845,18 +865,21 @@ function renderCart(){
   const body=$('#cartBody');
   if(!lines.length){ body.innerHTML=`<p class="empty">Your bag is empty. Loc spritz and gold cuffs are good places to start.</p><a class="btn ghost sm" href="#shop" data-action="close-cart" style="justify-self:start;margin-bottom:18px">Browse the shelf</a>`; return; }
   const t=cartTotals(ful), st=S.settings;
+  const keep = id => { const el=document.getElementById(id); return el ? esc(el.value) : ''; };
+  const vName=keep('cName'), vPhone=keep('cPhone'), vAddr=keep('cAddr');
   body.innerHTML = `
     <div style="display:grid;gap:14px">${lines.map(c=>`
       <div class="c-item"><div class="c-thumb">${pic(c.p)}</div>
         <div><div style="font-weight:600;line-height:1.25">${esc(c.p.name)}</div><div class="hint num">${money(c.p.price)} · ${esc(c.p.size)}</div></div>
-        <div class="qty"><button type="button" data-action="qty" data-id="${c.id}" data-d="-1" aria-label="Remove one">−</button><span class="num">${c.qty}</span><button type="button" data-action="qty" data-id="${c.id}" data-d="1" aria-label="Add one">+</button></div>
+        <div class="qty"><button type="button" data-action="qty" data-id="${esc(c.id)}" data-d="-1" aria-label="Remove one">−</button><span class="num">${c.qty}</span><button type="button" data-action="qty" data-id="${esc(c.id)}" data-d="1" aria-label="Add one">+</button></div>
       </div>`).join('')}</div>
     <form id="checkout" style="display:grid;gap:12px" novalidate>
+      <input class="hp" name="website" id="cWebsite" tabindex="-1" autocomplete="off" aria-hidden="true">
       <div class="field"><span class="lbl">How do you want it?</span>
         <div class="chips"><button type="button" class="chip" data-ful="pickup" aria-pressed="${ful==='pickup'}">Pick up at salon</button><button type="button" class="chip" data-ful="delivery" aria-pressed="${ful==='delivery'}">Delivery</button></div>
         ${ful==='delivery'?`<span class="hint">Delivery costs ${money(st.deliveryFee)}, and it's free on orders over ${money(st.freeOver)}.</span>`:''}</div>
-      <div class="row2"><div class="field"><label for="cName">Name</label><input id="cName" autocomplete="name"></div><div class="field"><label for="cPhone">Phone</label><input id="cPhone" type="tel" inputmode="tel" autocomplete="tel"></div></div>
-      ${ful==='delivery'?`<div class="field"><label for="cAddr">Delivery address</label><input id="cAddr" autocomplete="street-address"></div>`:''}
+      <div class="row2"><div class="field"><label for="cName">Name</label><input id="cName" autocomplete="name" value="${vName}"></div><div class="field"><label for="cPhone">Phone</label><input id="cPhone" type="tel" inputmode="tel" autocomplete="tel" value="${vPhone}"></div></div>
+      ${ful==='delivery'?`<div class="field"><label for="cAddr">Delivery address</label><input id="cAddr" autocomplete="street-address" value="${vAddr}"></div>`:''}
       <div class="sum num"><span>Subtotal</span><span>${money(t.sub)}</span><span>Delivery</span><span>${ful==='delivery'?(t.del?money(t.del):'Free'):'—'}</span><span class="total">Total</span><span class="total">${money(t.total)}</span></div>
       <div class="sheet-foot">
         <p class="err" id="cErr" hidden></p>
@@ -871,8 +894,9 @@ function closeCart(){ $('#scrim').hidden=true; $('#cart').hidden=true; document.
 /* booking */
 let pickedSlot=null;
 function openBooking(sid){
+  if(!S.services.length){ toast('The loc menu is still loading. Try again in a moment.'); return; }
   const sel=$('#bSvc');
-  sel.innerHTML = S.services.map(s=>`<option value="${s.id}">${esc(s.name)} · ${money(s.price)}</option>`).join('');
+  sel.innerHTML = S.services.map(s=>`<option value="${esc(s.id)}">${esc(s.name)} · ${money(s.price)}</option>`).join('');
   if(sid) sel.value=sid;
   const n=nextOpen(); $('#bDate').value = n ? n.d : today();
   pickedSlot = n ? n.t : null;
@@ -900,13 +924,73 @@ function renderBookSum(){
   $('#bSum').innerHTML = `<span>${esc(s.name)}</span><span>${money(s.price)}</span><span>Time needed</span><span>${esc(s.dur)}</span><span class="total">Deposit (${S.settings.depositPct}%)</span><span class="total">${money(dep)}</span><span class="hint">Pay after session</span><span class="hint">${money(s.price-dep)}</span>`;
 }
 
+/* confirmation */
+function showDone(kind, r){
+  const st = S.settings;
+  let eyebrow, title, rows, lead, waText;
+  if(kind==='booking'){
+    const dep = Math.round(r.price*st.depositPct/100);
+    eyebrow = 'Booking requested';
+    title = `See you ${r.date===today()?'today':fmtDate(r.date)} at ${r.time}`;
+    rows = [['Service', `${r.service} · ${money(r.price)}`], ['Deposit', `${money(dep)} (${st.depositPct}%)`], ['Name', r.name], ['Phone', r.phone]];
+    lead = `We'll call ${r.phone} to confirm your chair and share how to pay the deposit.`;
+    waText = `Hi ${st.name}, I just booked ${r.service} for ${fmtDate(r.date)} at ${r.time}.\nRef: ${r.id}\nName: ${r.name}\nPhone: ${r.phone}${r.notes?`\nAbout my locs: ${r.notes}`:''}`;
+  } else {
+    eyebrow = 'Order placed';
+    title = r.fulfilment==='delivery' ? 'We’ll pack it for delivery' : 'We’ll have it ready at the salon';
+    rows = [['Items', r.items.map(i=>`${i.qty}× ${i.name}`).join(', ')], ['Total', money(r.total)], [r.fulfilment==='delivery'?'Deliver to':'Pick up', r.fulfilment==='delivery'?r.address:'At the salon'], ['Phone', r.phone]];
+    lead = `We'll call ${r.phone} when it's ready. Pay with M-Pesa or cash.`;
+    waText = `Hi ${st.name}, I just placed order ${r.id}.\n${r.items.map(i=>`${i.qty}× ${i.name}`).join('\n')}\nTotal: ${money(r.total)}\n${r.fulfilment==='delivery'?`Delivery to: ${r.address}`:'Pick up at salon'}\nName: ${r.name}\nPhone: ${r.phone}`;
+  }
+  const wa = waLink(waText);
+  $('#doneBody').innerHTML = `
+    <div class="grab" aria-hidden="true"></div>
+    <div class="done-top"><span class="eyebrow">${eyebrow}</span><button type="button" class="x" data-action="close-dlg" aria-label="Close">×</button></div>
+    <h2>${esc(title)}</h2>
+    <p class="done-ref">Your reference <span class="mono">${esc(r.id)}</span></p>
+    <dl class="done-list">${rows.map(([k,v])=>`<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl>
+    <p class="hint">${esc(lead)}</p>
+    <div class="sheet-foot">
+      ${wa?`<a class="btn wa block" href="${esc(wa)}" target="_blank" rel="noopener">${icon('whatsapp')} Send details on WhatsApp</a>`:''}
+      <button type="button" class="btn ${wa?'ghost':''} block" data-action="close-dlg">Done</button>
+    </div>`;
+  $('#doneDlg').showModal();
+}
+
 /* ---------- admin ---------- */
-let tab = (()=>{ try{return localStorage.getItem(KEY+'-tab')||'overview';}catch(e){return 'overview';} })();
+let tab = readLS(TAB_KEY) || 'overview';
 const TABS = [['overview','Overview'],['bookings','Bookings'],['orders','Orders'],['products','Products'],['services','Services'],['settings','Settings']];
+if(!TABS.some(t=>t[0]===tab)) tab='overview';
 let bFilter='upcoming', oFilter='open';
 const B_STATUS=['pending','confirmed','done','cancelled'], O_STATUS=['new','packed','dispatched','completed','cancelled'];
 const cap = s => s[0].toUpperCase()+s.slice(1);
-const pill = (kind,id,st,list) => `<select class="pill s-${st}" data-status="${kind}" data-id="${id}" aria-label="Status">${list.map(x=>`<option value="${x}" ${x===st?'selected':''}>${cap(x)}</option>`).join('')}</select>`;
+const pill = (kind,key,st,list) => `<select class="pill s-${st}" data-status="${kind}" data-key="${esc(key)}" aria-label="Status">${list.map(x=>`<option value="${x}" ${x===st?'selected':''}>${cap(x)}</option>`).join('')}</select>`;
+const ALERT_WORD = {sent:'sent', failed:'failed', off:'off', sending:'sending…'};
+function alertsLine(n){
+  if(!n) return '';
+  const w = n.whatsapp||'off', e = n.email||'off';
+  if(w==='off' && e==='off') return '';
+  const bad = w==='failed' || e==='failed';
+  return `<span class="alerts${bad?' bad':''}">WhatsApp ${ALERT_WORD[w]||w} · Email ${ALERT_WORD[e]||e}</span>`;
+}
+const isNew = r => r.createdAt && (Date.now()-Date.parse(r.createdAt)) < 24*36e5 && (r.status==='pending' || r.status==='new');
+
+async function loadAdmin(quiet){
+  const seen = new Set([...S.bookings, ...S.orders].map(x=>x.id));
+  try {
+    const d = await api('admin/data');
+    const wasLoaded = S.loaded;
+    Object.assign(S, {services:d.services, products:d.products, settings:d.settings, bookings:d.bookings, orders:d.orders, channels:d.channels, loaded:true});
+    if(wasLoaded){
+      const fresh = [...d.bookings, ...d.orders].filter(x=>!seen.has(x.id)).length;
+      if(fresh) toast(`${fresh} new ${fresh===1?'request has':'requests have'} come in`);
+    }
+    renderAdmin();
+  } catch(e){
+    if(!quiet) toast(e.message);
+    if(!S.loaded) $('#adminMain').innerHTML = `<div class="panel"><h3>The admin couldn't load</h3><p class="hint">${esc(e.message)}</p><div><button class="btn sm" data-action="refresh">Try again</button></div></div>`;
+  }
+}
 
 function renderAdmin(){
   const pend = S.bookings.filter(b=>b.status==='pending').length, openO = S.orders.filter(o=>['new','packed'].includes(o.status)).length;
@@ -914,19 +998,21 @@ function renderAdmin(){
   const counts={bookings:pend,orders:openO,products:low};
   $('#tabs').innerHTML = TABS.map(([k,l])=>`<button class="tab" data-tab="${k}" ${k===tab?'aria-current="page"':''}>${l}${counts[k]?`<span class="n num">${counts[k]}</span>`:''}</button>`).join('');
   $('#aNav').innerHTML = TABS.filter(t=>t[0]!=='settings').map(([k,l])=>`<button data-tab="${k}" ${k===tab?'aria-current="page"':''}>${icon(k)}${l==='Overview'?'Today':l}${counts[k]?`<span class="n num">${counts[k]}</span>`:''}</button>`).join('');
-  $('#aBarSettings').toggleAttribute('aria-current', tab==='settings'); if(tab==='settings') $('#aBarSettings').setAttribute('aria-current','page');
+  if(tab==='settings') $('#aBarSettings').setAttribute('aria-current','page'); else $('#aBarSettings').removeAttribute('aria-current');
   const m=$('#adminMain'), title=TABS.find(t=>t[0]===tab)[1];
-  const chip = S.sample ? '<span class="sample-chip">Sample data</span>' : '';
-  const head = (actions='') => `<div class="a-top"><div><span class="eyebrow">${fmtDate(today())}</span><h1>${title}${chip}</h1></div>${actions}</div>`;
+  if(!S.loaded){ m.innerHTML = `<div class="a-top"><div><span class="eyebrow">${fmtDate(today())}</span><h1>${title}</h1></div></div><p class="empty">Loading bookings and orders…</p>`; return; }
+  const head = (actions='') => `<div class="a-top"><div><span class="eyebrow">${fmtDate(today())}</span><h1>${title}</h1></div><div class="a-actions"><button class="btn ghost sm keep" data-action="refresh">Refresh</button>${actions}</div></div>`;
+  const td=today();
 
   if(tab==='overview'){
-    const td=today();
     const todays=S.bookings.filter(b=>b.date===td&&b.status!=='cancelled');
     const upcoming=S.bookings.filter(b=>b.date>=td&&b.status!=='cancelled'&&b.status!=='done').sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time)).slice(0,6);
     const days=[...Array(7)].map((_,i)=>iso(addDays(new Date(),i-6)));
     const rev=days.map(d=>S.orders.filter(o=>o.date===d&&o.status!=='cancelled').reduce((a,o)=>a+o.total,0)+S.bookings.filter(b=>b.date===d&&b.status==='done').reduce((a,b)=>a+b.price,0));
     const week=rev.reduce((a,b)=>a+b,0);
-    m.innerHTML = head(`<button class="btn sm" data-action="go-store">Open storefront</button>`) + `
+    const ch=S.channels||{};
+    const alertNote = (!ch.whatsapp || !ch.email) ? `<div class="panel notice"><div><h3>${!ch.whatsapp&&!ch.email?'Alerts aren’t set up yet':'One alert channel isn’t set up'}</h3><p class="hint">Bookings still show here. To also get them on ${[!ch.whatsapp&&'WhatsApp',!ch.email&&'email'].filter(Boolean).join(' and ')}, follow the steps in Settings.</p></div><button class="btn sm" data-tab="settings">Set up alerts</button></div>` : '';
+    m.innerHTML = head(`<button class="btn sm" data-action="go-store">Open storefront</button>`) + alertNote + `
       <div class="kpis">
         <div class="kpi"><span class="l">Sessions today</span><span class="v num">${todays.length}</span><span class="s">${Math.max(0,S.settings.chairs*(S.settings.close-S.settings.open)-todays.length)} chair-hours free</span></div>
         <div class="kpi"><span class="l">To confirm</span><span class="v num">${pend}</span><span class="s">Call to confirm and take the deposit</span></div>
@@ -934,7 +1020,7 @@ function renderAdmin(){
         <div class="kpi"><span class="l">Last 7 days</span><span class="v num">${money(week)}</span><span class="s">Sessions done plus shop orders</span></div>
       </div>
       <div class="panel"><div class="panel-head"><h3>Coming up in the chair</h3><button class="link-btn" data-tab="bookings">All bookings</button></div>
-        <div class="list">${upcoming.map(b=>`<div class="li"><div class="when">${b.time}<small>${b.date===td?'Today':fmtDate(b.date)}</small></div><div style="min-width:0"><div class="who">${esc(b.name)} · ${esc(b.service)}</div><div class="what">${tel(b.phone)}${b.notes?` · ${esc(b.notes)}`:''}</div></div>${pill('b',b.id,b.status,B_STATUS)}</div>`).join('')||'<p class="empty">No upcoming bookings.</p>'}</div></div>
+        <div class="list">${upcoming.map(b=>`<div class="li"><div class="when">${b.time}<small>${b.date===td?'Today':fmtDate(b.date)}</small></div><div style="min-width:0"><div class="who">${isNew(b)?'<span class="new-dot" title="New"></span>':''}${esc(b.name)} · ${esc(b.service)}</div><div class="what">${tel(b.phone)}${b.notes?` · ${esc(b.notes)}`:''}</div></div>${pill('b',b.key,b.status,B_STATUS)}</div>`).join('')||'<p class="empty">No upcoming bookings yet. New ones appear here as customers book.</p>'}</div></div>
       <div class="cols">
         <div class="panel"><div class="panel-head"><h3>Revenue by day</h3><span class="hint">${esc(S.settings.currency)}, today in gold</span></div><div class="chart">${chart(days,rev)}</div></div>
         <div class="panel"><div class="panel-head"><h3>Low stock</h3><button class="link-btn" data-tab="products">Restock</button></div>
@@ -943,41 +1029,41 @@ function renderAdmin(){
   }
 
   if(tab==='bookings'){
-    const td=today();
     let rows=[...S.bookings];
     if(bFilter==='upcoming') rows=rows.filter(b=>b.date>=td&&!['cancelled','done'].includes(b.status));
     else if(bFilter!=='all') rows=rows.filter(b=>b.status===bFilter);
     rows.sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time)*(bFilter==='upcoming'?1:-1));
+    const ph = isPhone();
     m.innerHTML = head() + `
       <div class="chips scroll">${['upcoming','pending','confirmed','done','cancelled','all'].map(f=>`<button class="chip" data-bfilter="${f}" aria-pressed="${f===bFilter}">${cap(f)}</button>`).join('')}</div>
       <div class="tbl-wrap"><table class="t-cards t-book"><thead><tr><th>Ref</th><th>When</th><th>Client</th><th>Service</th><th class="r">Price</th><th class="r">Deposit</th><th>Status</th><th></th></tr></thead><tbody>
       ${rows.map(b=>`<tr>
         <td class="c-ref mono">${esc(b.id)}</td>
-        <td class="c-when num">${isPhone()?b.time:(b.date===td?'Today':fmtDate(b.date))}<span class="sub">${isPhone()?(b.date===td?'Today':fmtDate(b.date)):b.time}</span></td>
-        <td class="c-client">${esc(b.name)}<span class="sub">${tel(b.phone)}</span></td>
-        <td class="c-svc">${esc(b.service)}<span class="sub">${esc(b.notes)}</span></td>
+        <td class="c-when num">${ph?b.time:(b.date===td?'Today':fmtDate(b.date))}<span class="sub">${ph?(b.date===td?'Today':fmtDate(b.date)):b.time}</span></td>
+        <td class="c-client">${isNew(b)?'<span class="new-dot" title="New"></span>':''}${esc(b.name)}<span class="sub">${tel(b.phone)}</span></td>
+        <td class="c-svc">${esc(b.service)}<span class="sub">${esc(b.notes)}</span>${alertsLine(b.notified)}</td>
         <td class="c-price r num">${money(b.price)}</td>
         <td class="c-dep r num">${money(Math.round(b.price*S.settings.depositPct/100))}</td>
-        <td class="c-status">${pill('b',b.id,b.status,B_STATUS)}</td>
-        <td class="c-act"><div class="acts"><a class="icon-btn only-phone" href="tel:${esc(b.phone.replace(/[^\d+]/g,''))}">Call</a><button class="icon-btn del" data-action="del-booking" data-id="${b.id}">Delete</button></div></td></tr>`).join('')||`<tr><td colspan="8" class="empty">No bookings match this filter.</td></tr>`}
+        <td class="c-status">${pill('b',b.key,b.status,B_STATUS)}</td>
+        <td class="c-act"><div class="acts"><a class="icon-btn only-phone" href="tel:${esc(digits(b.phone))}">Call</a><button class="icon-btn del" data-action="del-booking" data-key="${esc(b.key)}">Delete</button></div></td></tr>`).join('')||`<tr><td colspan="8" class="empty">No bookings match this filter.</td></tr>`}
       </tbody></table></div>`;
   }
 
   if(tab==='orders'){
-    let rows=[...S.orders].sort((a,b)=>b.date.localeCompare(a.date));
+    let rows=[...S.orders].sort((a,b)=>(b.createdAt||b.date).localeCompare(a.createdAt||a.date));
     if(oFilter==='open') rows=rows.filter(o=>!['completed','cancelled'].includes(o.status));
     else if(oFilter!=='all') rows=rows.filter(o=>o.status===oFilter);
     m.innerHTML = head() + `
       <div class="chips scroll">${['open','new','packed','dispatched','completed','cancelled','all'].map(f=>`<button class="chip" data-ofilter="${f}" aria-pressed="${f===oFilter}">${cap(f)}</button>`).join('')}</div>
       <div class="tbl-wrap"><table class="t-cards t-orders"><thead><tr><th>Ref</th><th>Date</th><th>Customer</th><th>Items</th><th>Fulfilment</th><th class="r">Total</th><th>Status</th></tr></thead><tbody>
       ${rows.map(o=>`<tr>
-        <td class="c-ref mono">${esc(o.id)}<span class="sub only-phone">${o.date===today()?'Today':fmtDate(o.date)}</span></td>
-        <td class="c-date num">${o.date===today()?'Today':fmtDate(o.date)}</td>
-        <td class="c-client">${esc(o.name)}<span class="sub">${tel(o.phone)}</span></td>
+        <td class="c-ref mono">${esc(o.id)}<span class="sub only-phone">${o.date===td?'Today':fmtDate(o.date)}</span></td>
+        <td class="c-date num">${o.date===td?'Today':fmtDate(o.date)}</td>
+        <td class="c-client">${isNew(o)?'<span class="new-dot" title="New"></span>':''}${esc(o.name)}<span class="sub">${tel(o.phone)}</span>${alertsLine(o.notified)}</td>
         <td class="c-items">${o.items.map(i=>`${i.qty}× ${esc(i.name)}`).join('<br>')}</td>
         <td class="c-ful">${o.fulfilment==='delivery'?'Delivery':'Pickup'}${o.address?`<span class="sub">${esc(o.address)}</span>`:''}</td>
         <td class="c-total r num">${money(o.total)}</td>
-        <td class="c-status">${pill('o',o.id,o.status,O_STATUS)}</td></tr>`).join('')||`<tr><td colspan="7" class="empty">No orders match this filter.</td></tr>`}
+        <td class="c-status">${pill('o',o.key,o.status,O_STATUS)}</td></tr>`).join('')||`<tr><td colspan="7" class="empty">No orders match this filter.</td></tr>`}
       </tbody></table></div>`;
   }
 
@@ -989,8 +1075,8 @@ function renderAdmin(){
         <td class="c-name">${esc(p.name)}<span class="sub">${esc(p.size)}</span></td>
         <td class="c-cat">${esc(p.cat)}</td>
         <td class="c-price r num">${money(p.price)}</td>
-        <td class="c-stock r"><span class="stock">${p.stock===0?'<span class="tag out">Sold out</span>':p.stock<=5?'<span class="tag low">Low</span>':''}<input class="stock-in num" type="number" inputmode="numeric" min="0" value="${p.stock}" data-stock="${p.id}" aria-label="Stock for ${esc(p.name)}"></span></td>
-        <td class="c-act"><div class="acts"><button class="icon-btn" data-action="edit-product" data-id="${p.id}">Edit</button><button class="icon-btn del" data-action="del-product" data-id="${p.id}">Delete</button></div></td></tr>`).join('')}
+        <td class="c-stock r"><span class="stock">${p.stock===0?'<span class="tag out">Sold out</span>':p.stock<=5?'<span class="tag low">Low</span>':''}<input class="stock-in num" type="number" inputmode="numeric" min="0" value="${p.stock}" data-stock="${esc(p.id)}" aria-label="Stock for ${esc(p.name)}"></span></td>
+        <td class="c-act"><div class="acts"><button class="icon-btn" data-action="edit-product" data-id="${esc(p.id)}">Edit</button><button class="icon-btn del" data-action="del-product" data-id="${esc(p.id)}">Delete</button></div></td></tr>`).join('')||'<tr><td colspan="6" class="empty">No products yet.</td></tr>'}
       </tbody></table></div>`;
   }
 
@@ -1003,29 +1089,41 @@ function renderAdmin(){
         <td class="c-dur" style="white-space:nowrap">${esc(s.dur)}</td>
         <td class="c-care">${esc(s.care)}</td>
         <td class="c-price r num">${money(s.price)}</td>
-        <td class="c-act"><div class="acts"><button class="icon-btn" data-action="edit-service" data-id="${s.id}">Edit</button><button class="icon-btn del" data-action="del-service" data-id="${s.id}">Delete</button></div></td></tr>`).join('')}
+        <td class="c-act"><div class="acts"><button class="icon-btn" data-action="edit-service" data-id="${esc(s.id)}">Edit</button><button class="icon-btn del" data-action="del-service" data-id="${esc(s.id)}">Delete</button></div></td></tr>`).join('')||'<tr><td colspan="6" class="empty">No services yet.</td></tr>'}
       </tbody></table></div>`;
   }
 
   if(tab==='settings'){
-    const st=S.settings;
-    const f=(k,l,type='text',extra='')=>`<div class="field"><label for="set-${k}">${l}</label><input id="set-${k}" name="${k}" type="${type}" value="${esc(st[k])}" ${extra}></div>`;
+    const st=S.settings, ch=S.channels||{};
+    const f=(k,l,type='text',extra='',hint='')=>`<div class="field"><label for="set-${k}">${l}</label><input id="set-${k}" name="${k}" type="${type}" value="${esc(st[k])}" ${extra}>${hint?`<span class="hint">${hint}</span>`:''}</div>`;
+    const status = on => `<span class="tag ${on?'ok':'low'}">${on?'Connected':'Not set up'}</span>`;
     m.innerHTML = head() + `
+      <div class="panel">
+        <div class="panel-head"><h3>Booking alerts</h3><button class="btn sm" data-action="test-alert" ${ch.whatsapp||ch.email?'':'disabled'}>Send test alert</button></div>
+        <p class="hint">Every new booking and order is saved here, and also sent to you on these channels.</p>
+        <div class="alert-rows">
+          <div class="alert-row"><div><strong>WhatsApp</strong><span class="hint">Sent through CallMeBot to your own WhatsApp number.</span></div>${status(ch.whatsapp)}</div>
+          <div class="alert-row"><div><strong>Email</strong><span class="hint">Sent through Resend to your inbox.</span></div>${status(ch.email)}</div>
+        </div>
+        ${ch.whatsapp&&ch.email?'':`<p class="hint">The site owner sets these up in Netlify (Project configuration → Environment variables): <span class="mono">CALLMEBOT_PHONE</span> and <span class="mono">CALLMEBOT_APIKEY</span> for WhatsApp, <span class="mono">RESEND_API_KEY</span> and <span class="mono">NOTIFY_EMAIL</span> for email. After adding them, redeploy the site.</p>`}
+      </div>
       <form class="panel" id="settingsForm" novalidate>
+        <h3>Salon details</h3>
         <div class="settings">
           ${f('name','Business name')}${f('tagline','Tagline')}
-          ${f('phone','Phone','tel')}${f('address','Salon address')}
-          ${f('hours','Opening hours (shown to clients)')}${f('currency','Currency label','text','maxlength="5"')}
-          ${f('open','First booking hour (0–23)','number','min="0" max="23" inputmode="numeric"')}${f('close','Closing hour (0–24)','number','min="1" max="24" inputmode="numeric"')}
+          ${f('whatsapp','Salon WhatsApp number','tel','inputmode="tel" placeholder="2547XXXXXXXX"','With country code, no + or spaces. Customers use it for the “Send on WhatsApp” button.')}
+          ${f('phone','Phone (shown to customers)','tel')}
+          ${f('address','Salon address')}${f('hours','Opening hours (shown to clients)')}
+          ${f('open','First booking hour (0–23)','number','min="0" max="23" inputmode="numeric"')}${f('close','Closing hour (1–24)','number','min="1" max="24" inputmode="numeric"')}
           ${f('chairs','Chairs working at once','number','min="1" inputmode="numeric"')}${f('depositPct','Deposit %','number','min="0" max="100" inputmode="numeric"')}
           ${f('deliveryFee','Delivery fee','number','min="0" inputmode="numeric"')}${f('freeOver','Free delivery over','number','min="0" inputmode="numeric"')}
+          ${f('currency','Currency label','text','maxlength="5"')}${f('timezone','Time zone','text','placeholder="Africa/Nairobi"','Used to date orders and block past times.')}
         </div>
         <div><button class="btn" type="submit">Save settings</button></div>
       </form>
       <div class="panel only-phone">
         <h3>This device</h3>
-        <p class="hint">Changes are saved in this browser only. Connect a backend before you launch.</p>
-        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px"><button class="btn ghost sm" data-action="go-store">View store</button><button class="btn ghost sm" data-action="reset">Reset sample data</button><button class="btn ghost sm" data-action="sign-out">Sign out</button></div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn ghost sm" data-action="go-store">View store</button><button class="btn ghost sm" data-action="sign-out">Sign out</button></div>
       </div>`;
   }
 }
@@ -1056,7 +1154,7 @@ function openEdit(type,id){
     <div style="display:flex;justify-content:space-between;align-items:start"><h2>${id?'Edit':'Add'} ${isP?'product':'service'}</h2><button type="button" class="x" data-action="close-dlg" aria-label="Close">×</button></div>
     <div class="field"><label for="e-name">Name</label><input id="e-name" name="name" value="${v('name')}" required></div>
     <div class="row2">
-      <div class="field"><label for="e-cat">Category</label><select id="e-cat" name="cat">${[...new Set([...cats,item.cat].filter(Boolean))].map(c=>`<option ${c===item.cat?'selected':''}>${esc(c)}</option>`).join('')}</select></div>
+      <div class="field"><label for="e-cat">Category</label><select id="e-cat" name="cat">${cats.map(c=>`<option ${c===item.cat?'selected':''}>${esc(c)}</option>`).join('')}</select></div>
       <div class="field"><label for="e-price">Price (${esc(S.settings.currency)})</label><input id="e-price" name="price" type="number" inputmode="numeric" min="0" value="${v('price')}" required></div>
     </div>
     ${isP?`<div class="row2">
@@ -1064,7 +1162,7 @@ function openEdit(type,id){
       <div class="field"><label for="e-stock">Stock</label><input id="e-stock" name="stock" type="number" inputmode="numeric" min="0" value="${item.stock??0}"></div></div>
       <div class="row2">
       <div class="field"><label for="e-kind">Placeholder art</label><select id="e-kind" name="kind">${['bottle','jar','beads','bonnet','hook','box'].map(k=>`<option ${k===item.kind?'selected':''}>${k}</option>`).join('')}</select></div>
-      <div class="field"><label for="e-img">Photo (optional)</label><input id="e-img" type="file" accept="image/*"></div></div>
+      <div class="field"><label for="e-img">Photo (optional)</label><input id="e-img" type="file" accept="image/png,image/jpeg,image/webp"></div></div>
       ${item.img?`<label class="hint"><input type="checkbox" id="e-noimg"> Remove current photo</label>`:''}`
     :`<div class="row2">
       <div class="field"><label for="e-dur">Time needed</label><input id="e-dur" name="dur" value="${v('dur')}" placeholder="2–3 hrs"></div>
@@ -1078,20 +1176,19 @@ function openEdit(type,id){
 }
 function shrinkImage(file){
   return new Promise((res,rej)=>{ const r=new FileReader(); r.onerror=rej; r.onload=()=>{ const im=new Image(); im.onerror=rej; im.onload=()=>{
-    const s=Math.min(1,560/Math.max(im.width,im.height)), c=document.createElement('canvas'); c.width=im.width*s; c.height=im.height*s;
-    c.getContext('2d').drawImage(im,0,0,c.width,c.height); res(c.toDataURL('image/jpeg',.8)); }; im.src=r.result; }; r.readAsDataURL(file); });
+    const s=Math.min(1,900/Math.max(im.width,im.height)), c=document.createElement('canvas'); c.width=Math.round(im.width*s); c.height=Math.round(im.height*s);
+    c.getContext('2d').drawImage(im,0,0,c.width,c.height); res(c.toDataURL('image/jpeg',.82)); }; im.src=r.result; }; r.readAsDataURL(file); });
 }
 
 /* ---------- views ---------- */
 function show(view){
+  document.querySelectorAll('[data-strand]').forEach(el=>{ el.innerHTML=strandSVG(+el.dataset.len,(el.dataset.beads||'').split(',').map(Number)); });
   $('#store').hidden = view!=='store'; $('#adminView').hidden = view!=='admin';
   if(view==='admin') renderAdmin(); else renderStore();
-  window.scrollTo(0,0);
 }
-const touch = () => { S.sample=false; save(); };
 
 /* ---------- events ---------- */
-document.addEventListener('click', e=>{
+document.addEventListener('click', async e=>{
   const t=e.target.closest('[data-action],[data-svc-cat],[data-shop-cat],[data-slot],[data-day],[data-ful],[data-tab],[data-bfilter],[data-ofilter]');
   if(!t) return;
   const a=t.dataset.action, id=t.dataset.id;
@@ -1100,97 +1197,139 @@ document.addEventListener('click', e=>{
   if(t.dataset.slot){ pickedSlot=t.dataset.slot; renderSlots(); return; }
   if(t.dataset.day){ $('#bDate').value=t.dataset.day; pickedSlot=null; renderDays(); renderSlots(); return; }
   if(t.dataset.ful){ ful=t.dataset.ful; renderCart(); return; }
-  if(t.dataset.tab){ tab=t.dataset.tab; try{localStorage.setItem(KEY+'-tab',tab);}catch(_){} renderAdmin(); window.scrollTo(0,0); return; }
+  if(t.dataset.tab){ tab=t.dataset.tab; writeLS(TAB_KEY, tab); renderAdmin(); window.scrollTo(0,0); return; }
   if(t.dataset.bfilter){ bFilter=t.dataset.bfilter; renderAdmin(); return; }
   if(t.dataset.ofilter){ oFilter=t.dataset.ofilter; renderAdmin(); return; }
-  switch(a){
-    case 'book': openBooking(id); break;
-    case 'open-cart': openCart(); break;
-    case 'close-cart': closeCart(); break;
-    case 'close-dlg': t.closest('dialog').close(); break;
-    case 'go-admin': if(LOCAL) show('admin'); else location.href='/admin'; break;
-    case 'go-store': if(IS_ADMIN_URL) location.href='/'; else show('store'); break;
-    case 'sign-out': if(LOCAL) show('store'); else location.href='/admin/logout'; break;
-    case 'add': {
-      const p=S.products.find(x=>x.id===id), c=S.cart.find(x=>x.id===id);
-      if(c){ if(c.qty>=p.stock){ toast(`Only ${p.stock} in stock`); break; } c.qty++; } else S.cart.push({id,qty:1});
-      save(); renderCart(); toast(`Added ${p.name} to your bag`); break; }
-    case 'qty': {
-      const c=S.cart.find(x=>x.id===id), p=S.products.find(x=>x.id===id), d=+t.dataset.d;
-      if(d>0 && c.qty>=p.stock){ toast(`Only ${p.stock} in stock`); break; }
-      c.qty+=d; if(c.qty<=0) S.cart=S.cart.filter(x=>x.id!==id); save(); renderCart(); break; }
-    case 'reset':
-      if(confirm('Replace all products, services, bookings and orders with the sample data?')){ S=seed(); save(); renderAdmin(); toast('Sample data restored'); } break;
-    case 'del-booking':
-      if(confirm('Delete this booking?')){ S.bookings=S.bookings.filter(b=>b.id!==id); touch(); renderAdmin(); toast('Booking deleted'); } break;
-    case 'del-product':
-      if(confirm('Delete this product from the shop?')){ S.products=S.products.filter(p=>p.id!==id); S.cart=S.cart.filter(c=>c.id!==id); touch(); renderAdmin(); toast('Product deleted'); } break;
-    case 'del-service':
-      if(confirm('Remove this service from the loc menu?')){ S.services=S.services.filter(s=>s.id!==id); touch(); renderAdmin(); toast('Service removed'); } break;
-    case 'edit-product': openEdit('product',id); break;
-    case 'edit-service': openEdit('service',id); break;
-  }
+  try {
+    switch(a){
+      case 'book': openBooking(id); break;
+      case 'open-cart': openCart(); break;
+      case 'close-cart': closeCart(); break;
+      case 'close-dlg': t.closest('dialog').close(); break;
+      case 'go-admin': location.href='/admin'; break;
+      case 'go-store': if(IS_ADMIN_URL) location.href='/'; break;
+      case 'sign-out': location.href='/admin/logout'; break;
+      case 'refresh': await busy(t, 'Refreshing…', ()=>loadAdmin(false)); break;
+      case 'add': {
+        const p=S.products.find(x=>x.id===id), c=cart.find(x=>x.id===id);
+        if(c){ if(c.qty>=p.stock){ toast(`Only ${p.stock} in stock`); break; } c.qty++; } else cart.push({id,qty:1});
+        saveCart(); renderCart(); toast(`Added ${p.name} to your bag`); break; }
+      case 'qty': {
+        const c=cart.find(x=>x.id===id), p=S.products.find(x=>x.id===id), d=+t.dataset.d;
+        if(d>0 && c.qty>=p.stock){ toast(`Only ${p.stock} in stock`); break; }
+        c.qty+=d; if(c.qty<=0) cart=cart.filter(x=>x.id!==id); saveCart(); renderCart(); break; }
+      case 'del-booking':
+        if(confirm('Delete this booking? This can’t be undone.')){
+          await api('admin/bookings',{method:'DELETE', body:{key:t.dataset.key}});
+          S.bookings=S.bookings.filter(b=>b.key!==t.dataset.key); renderAdmin(); toast('Booking deleted'); }
+        break;
+      case 'del-product':
+        if(confirm('Delete this product from the shop?')){
+          const r=await api('admin/products',{method:'DELETE', body:{id}}); S.products=r.products; renderAdmin(); toast('Product deleted'); }
+        break;
+      case 'del-service':
+        if(confirm('Remove this service from the loc menu?')){
+          const r=await api('admin/services',{method:'DELETE', body:{id}}); S.services=r.services; renderAdmin(); toast('Service removed'); }
+        break;
+      case 'edit-product': openEdit('product',id); break;
+      case 'edit-service': openEdit('service',id); break;
+      case 'test-alert': {
+        const r = await busy(t, 'Sending…', ()=>api('admin/test-alert',{method:'POST'}));
+        const w=r.results.whatsapp, em=r.results.email;
+        toast(`Test alert: WhatsApp ${ALERT_WORD[w]||w}, email ${ALERT_WORD[em]||em}`);
+        break; }
+    }
+  } catch(err){ toast(err.message); }
 });
 document.addEventListener('change', async e=>{
   const t=e.target;
   if(t.id==='bSvc'){ renderBookSum(); }
   if(t.dataset.status){
-    const list = t.dataset.status==='b'?S.bookings:S.orders, it=list.find(x=>x.id===t.dataset.id);
-    it.status=t.value; touch(); renderAdmin(); toast(`${it.id} marked ${t.value}`);
+    const list = t.dataset.status==='b'?S.bookings:S.orders, it=list.find(x=>x.key===t.dataset.key);
+    const prev=it.status; it.status=t.value; renderAdmin();
+    try {
+      const r = await api(t.dataset.status==='b'?'admin/bookings':'admin/orders',{method:'PATCH', body:{key:it.key, status:it.status}});
+      Object.assign(it, r.record); if(r.products) S.products=r.products; renderAdmin();
+      toast(`${it.id} marked ${it.status}`);
+    } catch(err){ it.status=prev; renderAdmin(); toast(err.message); }
   }
   if(t.dataset.stock){
-    const p=S.products.find(x=>x.id===t.dataset.stock); p.stock=Math.max(0,parseInt(t.value)||0); touch(); renderAdmin(); toast(`Stock updated: ${p.name} (${p.stock})`);
+    const p=S.products.find(x=>x.id===t.dataset.stock), stock=Math.max(0,parseInt(t.value)||0);
+    try { const r=await api('admin/products',{method:'PUT', body:{item:{...p, stock}}}); S.products=r.products; renderAdmin(); toast(`Stock updated: ${p.name} (${stock})`); }
+    catch(err){ renderAdmin(); toast(err.message); }
   }
   if(t.id==='e-img' && t.files[0]){
     try{ pendingImg=await shrinkImage(t.files[0]); }catch(_){ $('#eErr').textContent='That file couldn’t be read as an image. Try a JPG or PNG.'; $('#eErr').hidden=false; }
   }
 });
-document.addEventListener('submit', e=>{
+document.addEventListener('submit', async e=>{
   e.preventDefault();
-  const f=e.target;
+  const f=e.target, btn=f.querySelector('[type=submit]');
   if(f.id==='bookForm'){
-    const name=$('#bName').value.trim(), phone=$('#bPhone').value.trim(), s=S.services.find(x=>x.id===$('#bSvc').value), err=$('#bErr');
+    const name=$('#bName').value.trim(), phone=$('#bPhone').value.trim(), err=$('#bErr');
     const miss=[!pickedSlot&&'a time',!name&&'your name',!phone&&'a phone number'].filter(Boolean);
     if(miss.length){ err.textContent=`Add ${miss.join(', ')} to request this booking.`; err.hidden=false; return; }
-    const b={id:uid('B'),name,phone,serviceId:s.id,service:s.name,price:s.price,date:$('#bDate').value,time:pickedSlot,status:'pending',notes:$('#bNotes').value.trim()};
-    S.bookings.push(b); save(); $('#bookDlg').close(); f.reset(); renderStore();
-    toast(`Booking requested for ${fmtDate(b.date)} at ${b.time}. Your ref is ${b.id}`);
+    err.hidden=true;
+    try {
+      const r = await busy(btn, 'Sending…', ()=>api('bookings',{method:'POST', body:{name, phone, serviceId:$('#bSvc').value, date:$('#bDate').value, time:pickedSlot, notes:$('#bNotes').value.trim(), website:$('#bWebsite').value}}));
+      const k=`${r.booking.date} ${r.booking.time}`; S.taken[k]=(S.taken[k]||0)+1;
+      $('#bookDlg').close(); f.reset(); renderStore(); showDone('booking', r.booking);
+    } catch(ex){
+      err.textContent=ex.message; err.hidden=false;
+      if(/taken/i.test(ex.message)){ await loadCatalog(); renderDays(); renderSlots(); }
+    }
   }
   if(f.id==='checkout'){
     const name=$('#cName').value.trim(), phone=$('#cPhone').value.trim(), addr=$('#cAddr')?.value.trim()||'', err=$('#cErr');
     const miss=[!name&&'your name',!phone&&'a phone number',ful==='delivery'&&!addr&&'a delivery address'].filter(Boolean);
     if(miss.length){ err.textContent=`Add ${miss.join(', ')} to place your order.`; err.hidden=false; return; }
-    const lines=cartLines(), tt=cartTotals(ful);
-    const o={id:uid('O'),name,phone,items:lines.map(c=>({productId:c.id,name:c.p.name,qty:c.qty,price:c.p.price})),subtotal:tt.sub,delivery:tt.del,total:tt.total,fulfilment:ful,address:addr,date:today(),status:'new'};
-    lines.forEach(c=>c.p.stock=Math.max(0,c.p.stock-c.qty));
-    S.orders.push(o); S.cart=[]; save(); closeCart(); renderStore();
-    toast(`Order placed. Your ref is ${o.id}`);
+    err.hidden=true;
+    try {
+      const r = await busy(btn, 'Placing order…', ()=>api('orders',{method:'POST', body:{name, phone, address:addr, fulfilment:ful, items:cart, website:$('#cWebsite').value}}));
+      S.products=r.products; cart=[]; saveCart(); closeCart(); renderStore(); showDone('order', r.order);
+    } catch(ex){ err.textContent=ex.message; err.hidden=false; loadCatalog(); }
   }
   if(f.id==='editForm'){
-    const {type,id}=editing, isP=type==='product', data=Object.fromEntries(new FormData(f));
-    if(!data.name.trim() || data.price===''){ const er=$('#eErr'); er.textContent='Add a name and a price to save.'; er.hidden=false; return; }
-    data.name=data.name.trim(); data.price=Math.max(0,+data.price);
-    if(isP){ data.stock=Math.max(0,parseInt(data.stock)||0); if(pendingImg) data.img=pendingImg; if($('#e-noimg')?.checked) data.img=''; }
-    const list=isP?S.products:S.services;
-    if(id) Object.assign(list.find(x=>x.id===id),data); else list.push({id:(isP?'p':'s')+Date.now(),...data});
-    touch(); $('#editDlg').close(); renderAdmin(); toast(id?'Changes saved':`${isP?'Product':'Service'} added`);
+    const {type,id}=editing, isP=type==='product', data=Object.fromEntries(new FormData(f)), er=$('#eErr');
+    if(!String(data.name||'').trim() || data.price===''){ er.textContent='Add a name and a price to save.'; er.hidden=false; return; }
+    try {
+      const body = {item:{...data, id}};
+      if(isP){ if(pendingImg) body.imgData=pendingImg; if($('#e-noimg')?.checked) body.removeImg=true; }
+      const r = await busy(btn, 'Saving…', ()=>api(isP?'admin/products':'admin/services',{method:'PUT', body}));
+      if(isP) S.products=r.products; else S.services=r.services;
+      $('#editDlg').close(); renderAdmin(); toast(id?'Changes saved':`${isP?'Product':'Service'} added`);
+    } catch(ex){ er.textContent=ex.message; er.hidden=false; }
   }
   if(f.id==='settingsForm'){
-    const d=Object.fromEntries(new FormData(f)), st=S.settings;
-    ['open','close','chairs','depositPct','deliveryFee','freeOver'].forEach(k=>d[k]=Math.max(0,+d[k]||0));
-    if(d.close<=d.open){ toast('Closing hour must be later than the first booking hour'); return; }
-    Object.assign(st,d); touch(); renderAdmin(); toast('Settings saved');
+    const d=Object.fromEntries(new FormData(f));
+    if((+d.close||0) <= (+d.open||0)){ toast('Closing hour must be later than the first booking hour'); return; }
+    try {
+      const r = await busy(btn, 'Saving…', ()=>api('admin/settings',{method:'PUT', body:{settings:d}}));
+      S.settings=r.settings; renderAdmin(); toast('Settings saved');
+    } catch(ex){ toast(ex.message); }
   }
 });
 document.addEventListener('keydown', e=>{ if(e.key==='Escape' && !$('#cart').hidden) closeCart(); });
-/* tap the dimmed area above a sheet to close it */
+/* tap the dimmed area around a sheet to close it */
 document.querySelectorAll('dialog').forEach(d=>d.addEventListener('click', e=>{ if(e.target===d){ const r=d.getBoundingClientRect(); if(e.clientY<r.top||e.clientY>r.bottom||e.clientX<r.left||e.clientX>r.right) d.close(); } }));
 /* re-render admin cards when rotating between phone and desktop widths */
 matchMedia('(max-width:760px)').addEventListener?.('change', ()=>{ if(!$('#adminView').hidden) renderAdmin(); });
 
-/* Admin lives at /admin, which Netlify only serves after staff sign-in (netlify/edge-functions/admin-auth.js).
-   Opening the file locally (or on localhost) skips sign-in for testing. */
-if(IS_ADMIN_URL) show('admin'); else { show('store'); if(location.hash==='#book') openBooking(); }
+/* Admin lives at /admin, which Netlify only serves after staff sign-in (netlify/edge-functions/admin-auth.js). */
+if(IS_ADMIN_URL){
+  show('admin'); loadAdmin(false);
+  setInterval(()=>{ if(document.visibilityState==='visible') loadAdmin(true); }, 60000);
+  document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible' && S.loaded) loadAdmin(true); });
+} else {
+  show('store');
+  loadCatalog().then(()=>{ if(location.hash==='#book') openBooking(); });
+  /* pick up admin changes (prices, stock, open times) while the shop stays open */
+  let lastLoad = Date.now();
+  const refreshShop = () => { if(document.visibilityState!=='visible' || Date.now()-lastLoad < 20000) return; if($('#bookDlg').open || !$('#cart').hidden) return; lastLoad = Date.now(); loadCatalog(true); };
+  document.addEventListener('visibilitychange', refreshShop);
+  window.addEventListener('focus', refreshShop);
+  setInterval(refreshShop, 120000);
+}
 
 /* installable app (phone home screen, or Windows via Edge/Chrome) */
 if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('/sw.js').catch(()=>{});
