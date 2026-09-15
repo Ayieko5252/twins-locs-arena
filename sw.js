@@ -1,5 +1,5 @@
 // Network first, so updates show straight away; falls back to the cached copy when offline.
-const CACHE = 'tla-v4';
+const CACHE = 'tla-v5';
 const SHELL = ['/', '/index.html', '/manifest.webmanifest', '/icons/icon-192.png', '/icons/icon-512.png'];
 
 self.addEventListener('install', e => {

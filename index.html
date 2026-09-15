@@ -491,6 +491,50 @@ td .sub{display:block;font-size:.8rem;color:var(--muted)}
 .alerts{display:block;font-size:.74rem;color:var(--ok);font-weight:600;margin-top:2px}
 .alerts.bad{color:var(--bad)}
 .new-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--gold);margin-right:6px;vertical-align:middle}
+.acct-btn{display:inline-flex;align-items:center;gap:8px;border:1.5px solid var(--ink);background:transparent;color:var(--ink);border-radius:999px;padding:.42em .95em;font-weight:600;font-size:.88rem;cursor:pointer;white-space:nowrap;max-width:190px}
+.acct-btn.in{padding:.25em .85em .25em .3em}
+.acct-btn .ic{width:18px;height:18px}
+.acct-name{overflow:hidden;text-overflow:ellipsis}
+.avatar{width:28px;height:28px;border-radius:50%;object-fit:cover;display:inline-grid;place-items:center;background:var(--loc);color:var(--on-umber);font-weight:700;font-size:.78rem;flex:none;overflow:hidden}
+.avatar.md{width:36px;height:36px;font-size:.9rem}
+.avatar.lg{width:56px;height:56px;font-size:1.2rem}
+.acct{max-width:520px;margin:0 auto;width:100%}
+.acct-head{display:flex;align-items:center;gap:14px;min-width:0}
+.acct-head h2{font-size:1.5rem;overflow-wrap:anywhere}
+.acct h3{font-size:1.15rem;margin-top:4px}
+.me-form{display:flex;gap:10px;align-items:end}
+.me-form .field{flex:1}
+.gsi-wrap{min-height:48px;display:flex;align-items:center}
+#acctDlg{width:min(560px,calc(100% - 24px))}
+.pill-static{display:inline-block;border-radius:999px;padding:.2em .7em;font-weight:700;font-size:.76rem;white-space:nowrap}
+.sign-hint{font-size:.86rem;color:var(--ink-2);background:var(--gold-soft);border-radius:8px;padding:.6em .8em}
+.sign-hint .link-btn{font-size:inherit}
+.foot-note{font-size:.8rem}
+.who-cell{display:flex;align-items:center;gap:10px;min-width:0}
+.who-cell > span{min-width:0;overflow-wrap:anywhere}
+.a-sec{display:grid;gap:10px;min-width:0}
+.a-sec .panel-head{padding:0 2px}
+.more-list{padding:4px 0;gap:0}
+.more-row{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;background:none;border:0;border-bottom:1px solid var(--line);padding:14px 18px;text-align:left;cursor:pointer;color:var(--ink);font:inherit;width:100%}
+.more-row:last-child{border-bottom:0}
+.more-row .hint{display:block}
+.import-note{background:var(--info-bg)}
+@media (max-width:760px){
+  .acct-btn{margin-left:auto;font-size:.84rem}
+  .foot-note{order:3;width:100%}
+  .t-cust tr{grid-template-columns:1fr auto;grid-template-areas:"who last" "phone phone" "act act"}
+  .t-cust .c-who{grid-area:who}
+  .t-cust .c-phone{grid-area:phone;font-size:.88rem}
+  .t-cust .c-act{grid-area:act;font-size:.84rem;color:var(--muted)}
+  .t-cust .c-last{grid-area:last;font-size:.8rem;color:var(--muted);text-align:right}
+  .t-cust .c-first{display:none}
+  .t-vis tr{grid-template-columns:1fr auto;grid-template-areas:"who last" "device src"}
+  .t-vis .c-who{grid-area:who}
+  .t-vis .c-last{grid-area:last;font-size:.8rem;color:var(--muted);text-align:right}
+  .t-vis .c-device{grid-area:device;font-size:.84rem;color:var(--muted)}
+  .t-vis .c-src{grid-area:src;font-size:.84rem;color:var(--muted);text-align:right}
+  .t-vis .c-visits,.t-vis .c-first{display:none}
+}
 @keyframes sheet-up{from{transform:translateY(40px);opacity:.6}to{transform:none;opacity:1}}
 @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
 </style>
@@ -511,7 +555,7 @@ td .sub{display:block;font-size:.8rem;color:var(--muted)}
       <div class="nav-actions">
         <button class="btn ghost sm" data-action="open-cart">Bag <span class="bag-count num" id="bagCount">0</span></button>
       </div>
-      <a class="btn ghost sm nav-call" href="#visit">Visit us</a>
+      <button class="acct-btn" id="acctBtn" data-action="account" hidden></button>
     </div>
   </header>
 
@@ -602,7 +646,7 @@ td .sub{display:block;font-size:.8rem;color:var(--muted)}
       </div>
     </section>
   </main>
-  <footer><div class="wrap"><span id="footName">© Twins Locs Arena</span><button class="link-btn" data-action="go-admin">Staff admin</button></div></footer>
+  <footer><div class="wrap"><span id="footName">© Twins Locs Arena</span><span class="foot-note">We count visits anonymously (no IP addresses) to improve this site.</span><button class="link-btn" data-action="go-admin">Staff admin</button></div></footer>
 
   <nav class="tabbar" aria-label="Quick navigation">
     <a href="#home" data-nav="home" aria-current="true"><svg class="ic" viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Home</a>
@@ -635,6 +679,7 @@ td .sub{display:block;font-size:.8rem;color:var(--muted)}
     <div class="dlg-side">
       <span class="eyebrow">Your details</span>
       <input class="hp" name="website" id="bWebsite" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <div id="bSignin"></div>
       <div class="field"><label for="bName">Name</label><input id="bName" autocomplete="name" required></div>
       <div class="field"><label for="bPhone">Phone</label><input id="bPhone" type="tel" inputmode="tel" autocomplete="tel" required></div>
       <div class="sum num" id="bSum"></div>
@@ -650,6 +695,11 @@ td .sub{display:block;font-size:.8rem;color:var(--muted)}
 <!-- confirmation after booking or order -->
 <dialog id="doneDlg" aria-label="Confirmation">
   <div class="dlg-main done" id="doneBody"></div>
+</dialog>
+
+<!-- customer account (Sign in with Google) -->
+<dialog id="acctDlg" aria-label="Your account">
+  <div class="dlg-main acct" id="acctBody"></div>
 </dialog>
 
 <!-- ============ ADMIN ============ -->
@@ -757,6 +807,12 @@ const ICON = {
   orders:'<path d="M3.5 7.5 12 3.5l8.5 4-8.5 4z"/><path d="M3.5 7.5v9l8.5 4 8.5-4v-9M12 11.5v9"/>',
   products:'<path d="M3.5 12.5V4h8.5l9 9-8.5 8.5z"/><circle cx="8" cy="8.5" r="1.5"/>',
   services:'<path d="M4 4h16v5H4zM6.5 9v11M10 9v11M13.5 9v8M17 9v11"/>',
+  visitors:'<circle cx="9" cy="8" r="3.2"/><path d="M3 20c.6-3.4 3-5.3 6-5.3s5.4 1.9 6 5.3"/><circle cx="17" cy="9" r="2.4"/><path d="M16.5 14.6c2.4.2 4 1.9 4.5 4.6"/>',
+  more:'<circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/>',
+  settings:'<path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/>',
+  store:'<path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
+  signout:'<path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 17l5-5-5-5M15 12H4"/>',
+  user:'<circle cx="12" cy="8.5" r="3.5"/><path d="M5 20c.8-3.8 3.6-6 7-6s6.2 2.2 7 6"/>',
   whatsapp:'<path d="M4 20l1.2-3.6A8 8 0 1 1 8 19.1z"/><path d="M9 9.5c.3 2.2 2.3 4.2 4.5 4.6l1-1.1 1.8.8-.3 1.5c-3.8.3-7.5-3.4-7.2-7.2l1.5-.3.8 1.8z"/>'
 };
 const icon = k => `<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">${ICON[k]}</svg>`;
@@ -787,6 +843,7 @@ function renderStore(){
   $('#tagline').textContent = st.tagline;
   document.title = IS_ADMIN_URL ? `Admin · ${st.name}` : st.name;
   $('#footName').textContent = `© ${new Date().getFullYear()} ${st.name}`;
+  renderAcct();
   $('#depPctTxt').textContent = `${st.depositPct}%`;
   if(!S.services.length){
     $('#nextSlot').textContent = 'Loading open times…';
@@ -866,7 +923,7 @@ function renderCart(){
   if(!lines.length){ body.innerHTML=`<p class="empty">Your bag is empty. Loc spritz and gold cuffs are good places to start.</p><a class="btn ghost sm" href="#shop" data-action="close-cart" style="justify-self:start;margin-bottom:18px">Browse the shelf</a>`; return; }
   const t=cartTotals(ful), st=S.settings;
   const keep = id => { const el=document.getElementById(id); return el ? esc(el.value) : ''; };
-  const vName=keep('cName'), vPhone=keep('cPhone'), vAddr=keep('cAddr');
+  const vName=keep('cName') || (S.me?esc(S.me.name):''), vPhone=keep('cPhone') || (S.me?esc(S.me.phone||''):''), vAddr=keep('cAddr');
   body.innerHTML = `
     <div style="display:grid;gap:14px">${lines.map(c=>`
       <div class="c-item"><div class="c-thumb">${pic(c.p)}</div>
@@ -875,6 +932,7 @@ function renderCart(){
       </div>`).join('')}</div>
     <form id="checkout" style="display:grid;gap:12px" novalidate>
       <input class="hp" name="website" id="cWebsite" tabindex="-1" autocomplete="off" aria-hidden="true">
+      ${!S.me && S.settings.googleClientId ? `<p class="sign-hint"><button type="button" class="link-btn" data-action="account">Sign in with Google</button> to fill in your details and track this order.</p>` : ''}
       <div class="field"><span class="lbl">How do you want it?</span>
         <div class="chips"><button type="button" class="chip" data-ful="pickup" aria-pressed="${ful==='pickup'}">Pick up at salon</button><button type="button" class="chip" data-ful="delivery" aria-pressed="${ful==='delivery'}">Delivery</button></div>
         ${ful==='delivery'?`<span class="hint">Delivery costs ${money(st.deliveryFee)}, and it's free on orders over ${money(st.freeOver)}.</span>`:''}</div>
@@ -900,7 +958,7 @@ function openBooking(sid){
   if(sid) sel.value=sid;
   const n=nextOpen(); $('#bDate').value = n ? n.d : today();
   pickedSlot = n ? n.t : null;
-  $('#bErr').hidden=true; renderDays(); renderSlots(); renderBookSum(); $('#bookDlg').showModal();
+  $('#bErr').hidden=true; renderDays(); renderSlots(); renderBookSum(); prefillBooking(); $('#bookDlg').showModal();
   const cur=$('#bDays [aria-pressed="true"]'); if(cur) cur.scrollIntoView({block:'nearest',inline:'center'});
 }
 function renderDays(){
@@ -922,6 +980,122 @@ function renderBookSum(){
   const s=S.services.find(x=>x.id===$('#bSvc').value); if(!s) return;
   const dep=Math.round(s.price*S.settings.depositPct/100);
   $('#bSum').innerHTML = `<span>${esc(s.name)}</span><span>${money(s.price)}</span><span>Time needed</span><span>${esc(s.dur)}</span><span class="total">Deposit (${S.settings.depositPct}%)</span><span class="total">${money(dep)}</span><span class="hint">Pay after session</span><span class="hint">${money(s.price-dep)}</span>`;
+}
+
+/* ---------- visits (anonymous) ---------- */
+function readVid(){
+  let vid=''; try { vid = localStorage.getItem('tla-vid') || ''; } catch(e){}
+  if(!/^[a-z0-9]{16,40}$/.test(vid)){
+    vid = Array.from(crypto.getRandomValues(new Uint8Array(12)), b=>b.toString(36).padStart(2,'0')).join('');
+    try { localStorage.setItem('tla-vid', vid); } catch(e){}
+  }
+  return vid;
+}
+function trackVisit(){
+  try {
+    if(navigator.doNotTrack==='1' || window.doNotTrack==='1' || navigator.globalPrivacyControl) return;
+    if(sessionStorage.getItem('tla-visit')) return;
+    sessionStorage.setItem('tla-visit','1');
+    const ua = navigator.userAgent;
+    const os = /Android/i.test(ua)?'Android' : (/iPad/i.test(ua)||(/Macintosh/.test(ua)&&navigator.maxTouchPoints>1))?'iPad' : /iPhone|iPod/i.test(ua)?'iPhone' : /CrOS/.test(ua)?'ChromeOS' : /Windows/i.test(ua)?'Windows' : /Mac OS X|Macintosh/i.test(ua)?'Mac' : /Linux/i.test(ua)?'Linux' : 'Other';
+    const device = (os==='iPad' || (/Android/i.test(ua) && !/Mobile/i.test(ua))) ? 'Tablet' : /Mobi|iPhone|Android/i.test(ua) ? 'Phone' : 'Computer';
+    const named = h => /(^|\.)google\./.test(h)?'Google' : /facebook|fb\.(com|me)/.test(h)?'Facebook' : /instagram/.test(h)?'Instagram' : /(^|\.)(t\.co|twitter\.com|x\.com)$/.test(h)?'X (Twitter)' : /whatsapp/.test(h)?'WhatsApp' : /tiktok/.test(h)?'TikTok' : /bing\./.test(h)?'Bing' : h;
+    let source = new URLSearchParams(location.search).get('utm_source') || '';
+    if(!source && document.referrer){ try { const h = new URL(document.referrer).hostname.replace(/^www\./,''); if(h && h!==location.hostname) source = named(h); } catch(e){} }
+    fetch('/api/visit', {method:'POST', headers:{'Content-Type':'application/json'}, keepalive:true, body: JSON.stringify({vid:readVid(), path:location.pathname+location.hash, source, device, os})}).catch(()=>{});
+  } catch(e){}
+}
+
+/* ---------- customer accounts (Sign in with Google) ---------- */
+const SIGNED_KEY = 'tla-signed-in';
+const firstName = n => String(n||'').trim().split(/\s+/)[0] || 'Account';
+const initials = n => String(n||'?').trim().split(/\s+/).slice(0,2).map(w=>w[0]).join('').toUpperCase();
+const avatar = (p, size='') => p && p.picture ? `<img class="avatar ${size}" src="${esc(p.picture)}" alt="" referrerpolicy="no-referrer">` : `<span class="avatar ${size}" aria-hidden="true">${esc(initials(p&&p.name))}</span>`;
+const statusTag = st => `<span class="pill-static s-${esc(st)}">${cap(st)}</span>`;
+
+function renderAcct(){
+  const b = $('#acctBtn'); if(!b) return;
+  if(S.me){ b.hidden=false; b.classList.add('in'); b.innerHTML = `${avatar(S.me)}<span class="acct-name">${esc(firstName(S.me.name))}</span>`; b.setAttribute('aria-label','Your account and bookings'); }
+  else if(S.settings.googleClientId){ b.hidden=false; b.classList.remove('in'); b.innerHTML = `${icon('user')}<span class="acct-name">Sign in</span>`; b.setAttribute('aria-label','Sign in with Google'); }
+  else b.hidden = true;
+}
+async function loadMe(){
+  try {
+    const r = await api('me');
+    S.me = r.me; S.myBookings = r.bookings||[]; S.myOrders = r.orders||[];
+    writeLS(SIGNED_KEY, !!r.me);
+  } catch(e){}
+  renderAcct();
+  if($('#acctDlg').open) renderAccount();
+}
+let gsiPromise = null, gsiReadyFor = '';
+function loadGsi(){
+  if(window.google && google.accounts && google.accounts.id) return Promise.resolve();
+  return gsiPromise || (gsiPromise = new Promise((res, rej)=>{
+    const sc = document.createElement('script');
+    sc.src = 'https://accounts.google.com/gsi/client'; sc.async = true;
+    sc.onload = res; sc.onerror = ()=>{ gsiPromise = null; rej(new Error('Google sign-in couldn’t load. Check your connection and try again.')); };
+    document.head.appendChild(sc);
+  }));
+}
+async function mountGoogleButton(){
+  const el = $('#gsiBtn'); if(!el) return;
+  const cid = S.settings.googleClientId;
+  if(!cid){ el.innerHTML = '<span class="hint">Google sign-in isn’t available yet.</span>'; return; }
+  try {
+    await loadGsi();
+    if(gsiReadyFor !== cid){
+      google.accounts.id.initialize({client_id:cid, callback:onGoogleCredential, ux_mode:'popup', auto_select:false, cancel_on_tap_outside:true, context:'signin', itp_support:true});
+      gsiReadyFor = cid;
+    }
+    el.innerHTML = '';
+    google.accounts.id.renderButton(el, {type:'standard', theme:'outline', size:'large', shape:'pill', text:'signin_with', logo_alignment:'left', width: Math.max(220, Math.min(320, el.clientWidth || 300))});
+  } catch(e){ el.innerHTML = `<span class="err">${esc(e.message)}</span>`; }
+}
+async function onGoogleCredential(resp){
+  try {
+    const r = await api('auth/google', {method:'POST', body:{credential:resp.credential, vid:readVid()}});
+    S.me = r.me; writeLS(SIGNED_KEY, true); renderAcct();
+    toast(`Signed in as ${r.me.name}`);
+    await loadMe(); prefillBooking(); renderCart();
+  } catch(e){ toast(e.message); }
+}
+function renderAccount(){
+  const me = S.me, body = $('#acctBody');
+  if(!me){
+    body.innerHTML = `
+      <div class="grab" aria-hidden="true"></div>
+      <div class="done-top"><span class="eyebrow">Sign in</span><button type="button" class="x" data-action="close-dlg" aria-label="Close">×</button></div>
+      <h2>Book faster and keep track of your locs</h2>
+      <p style="color:var(--ink-2)">Sign in with Google and we’ll fill in your details when you book or order. You’ll also see all your bookings and orders in one place.</p>
+      <div class="gsi-wrap" id="gsiBtn"><span class="hint">Loading Google sign-in…</span></div>
+      <p class="hint">We only use your name, email and profile photo from Google. We never post anything or see your password.</p>`;
+    mountGoogleButton();
+    return;
+  }
+  const td = today();
+  const bookings = [...(S.myBookings||[])].sort((a,b)=>(b.date+b.time).localeCompare(a.date+a.time));
+  const orders = [...(S.myOrders||[])].sort((a,b)=>(b.createdAt||b.date||'').localeCompare(a.createdAt||a.date||''));
+  body.innerHTML = `
+    <div class="grab" aria-hidden="true"></div>
+    <div class="done-top"><span class="eyebrow">Your account</span><button type="button" class="x" data-action="close-dlg" aria-label="Close">×</button></div>
+    <div class="acct-head">${avatar(me,'lg')}<div style="min-width:0"><h2>${esc(me.name)}</h2><p class="hint">${esc(me.email)}</p></div></div>
+    <form class="me-form" id="meForm" novalidate>
+      <div class="field"><label for="mePhone">Phone for bookings</label><input id="mePhone" type="tel" inputmode="tel" autocomplete="tel" value="${esc(me.phone)}" placeholder="We call this number to confirm"></div>
+      <button class="btn ghost sm" type="submit">Save</button>
+    </form>
+    <h3>Your bookings</h3>
+    <div class="list">${bookings.map(b=>`<div class="li"><div class="when">${esc(b.time)}<small>${b.date===td?'Today':fmtDate(b.date)}</small></div><div style="min-width:0"><div class="who">${esc(b.service)}</div><div class="what">${esc(b.id)} · ${money(b.price)}</div></div>${statusTag(b.status)}</div>`).join('') || `<p class="empty">No bookings yet.</p><div><button class="btn sm" data-action="book">Book a session</button></div>`}</div>
+    <h3>Your orders</h3>
+    <div class="list">${orders.map(o=>`<div class="li"><div class="when">${money(o.total)}<small>${fmtDate((o.createdAt||'').slice(0,10)||td)}</small></div><div style="min-width:0"><div class="who">${(o.items||[]).map(i=>`${i.qty}× ${esc(i.name)}`).join(', ')}</div><div class="what">${esc(o.id)} · ${o.fulfilment==='delivery'?'Delivery':'Pick up'}</div></div>${statusTag(o.status)}</div>`).join('') || '<p class="empty">No orders yet.</p>'}</div>
+    <div class="sheet-foot"><button type="button" class="btn ghost block" data-action="customer-sign-out">Sign out</button></div>`;
+}
+function openAccount(){ renderAccount(); if(!$('#acctDlg').open) $('#acctDlg').showModal(); if(S.me) loadMe(); }
+function prefillBooking(){
+  const n=$('#bName'), ph=$('#bPhone');
+  if(S.me){ if(n && !n.value) n.value = S.me.name; if(ph && !ph.value) ph.value = S.me.phone||''; }
+  const slot = $('#bSignin');
+  if(slot) slot.innerHTML = (!S.me && S.settings.googleClientId) ? `<p class="sign-hint"><button type="button" class="link-btn" data-action="account">Sign in with Google</button> to fill this in and keep track of your bookings.</p>` : '';
 }
 
 /* confirmation */
@@ -959,7 +1133,8 @@ function showDone(kind, r){
 
 /* ---------- admin ---------- */
 let tab = readLS(TAB_KEY) || 'overview';
-const TABS = [['overview','Overview'],['bookings','Bookings'],['orders','Orders'],['products','Products'],['services','Services'],['settings','Settings']];
+const TABS = [['overview','Overview'],['bookings','Bookings'],['orders','Orders'],['visitors','Visitors'],['products','Products'],['services','Services'],['settings','Settings'],['more','More']];
+const PHONE_TABS = [['overview','Today'],['bookings','Bookings'],['orders','Orders'],['visitors','Visitors'],['more','More']];
 if(!TABS.some(t=>t[0]===tab)) tab='overview';
 let bFilter='upcoming', oFilter='open';
 const B_STATUS=['pending','confirmed','done','cancelled'], O_STATUS=['new','packed','dispatched','completed','cancelled'];
@@ -992,14 +1167,31 @@ async function loadAdmin(quiet){
   }
 }
 
+async function loadVisitors(quiet){
+  S.visLoading = true;
+  try { S.vis = await api('admin/visitors'); }
+  catch(e){ if(!quiet) toast(e.message); if(!S.vis || S.vis.error) S.vis = {error:e.message}; }
+  finally { S.visLoading = false; }
+  if(tab==='visitors') renderAdmin();
+}
+/* Data saved in this browser by the first version of the admin, before the online database. */
+const OLD_KEY = 'tla-store-v1', OLD_DONE_KEY = 'tla-store-v1-imported';
+const OLD_SAMPLE = new Set(['TLA-B1031','TLA-B1034','TLA-B1035','TLA-B1037','TLA-B1039','TLA-B1042','TLA-B1043','TLA-B1044','TLA-B1045','TLA-B1046','TLA-O2201','TLA-O2204','TLA-O2207','TLA-O2209','TLA-O2210']);
+function oldLocalData(){
+  const d = readLS(OLD_KEY);
+  if(!d || d.sample!==false || readLS(OLD_DONE_KEY)) return null;
+  return {...d, realBookings:(d.bookings||[]).filter(b=>!OLD_SAMPLE.has(b.id)).length, realOrders:(d.orders||[]).filter(o=>!OLD_SAMPLE.has(o.id)).length};
+}
+
 function renderAdmin(){
   const pend = S.bookings.filter(b=>b.status==='pending').length, openO = S.orders.filter(o=>['new','packed'].includes(o.status)).length;
   const low = S.products.filter(p=>p.stock<=5).length;
   const counts={bookings:pend,orders:openO,products:low};
-  $('#tabs').innerHTML = TABS.map(([k,l])=>`<button class="tab" data-tab="${k}" ${k===tab?'aria-current="page"':''}>${l}${counts[k]?`<span class="n num">${counts[k]}</span>`:''}</button>`).join('');
-  $('#aNav').innerHTML = TABS.filter(t=>t[0]!=='settings').map(([k,l])=>`<button data-tab="${k}" ${k===tab?'aria-current="page"':''}>${icon(k)}${l==='Overview'?'Today':l}${counts[k]?`<span class="n num">${counts[k]}</span>`:''}</button>`).join('');
+  $('#tabs').innerHTML = TABS.filter(t=>t[0]!=='more').map(([k,l])=>`<button class="tab" data-tab="${k}" ${k===tab?'aria-current="page"':''}>${l}${counts[k]?`<span class="n num">${counts[k]}</span>`:''}</button>`).join('');
+  const inMore = ['products','services','settings','more'].includes(tab);
+  $('#aNav').innerHTML = PHONE_TABS.map(([k,l])=>{ const cur = k===tab || (k==='more' && inMore); const n = k==='more' ? counts.products : counts[k]; return `<button data-tab="${k}" ${cur?'aria-current="page"':''}>${icon(k)}${l}${n?`<span class="n num">${n}</span>`:''}</button>`; }).join('');
   if(tab==='settings') $('#aBarSettings').setAttribute('aria-current','page'); else $('#aBarSettings').removeAttribute('aria-current');
-  const m=$('#adminMain'), title=TABS.find(t=>t[0]===tab)[1];
+  const m=$('#adminMain'), title=(TABS.find(t=>t[0]===tab)||TABS[0])[1];
   if(!S.loaded){ m.innerHTML = `<div class="a-top"><div><span class="eyebrow">${fmtDate(today())}</span><h1>${title}</h1></div></div><p class="empty">Loading bookings and orders…</p>`; return; }
   const head = (actions='') => `<div class="a-top"><div><span class="eyebrow">${fmtDate(today())}</span><h1>${title}</h1></div><div class="a-actions"><button class="btn ghost sm keep" data-action="refresh">Refresh</button>${actions}</div></div>`;
   const td=today();
@@ -1012,7 +1204,9 @@ function renderAdmin(){
     const week=rev.reduce((a,b)=>a+b,0);
     const ch=S.channels||{};
     const alertNote = (!ch.whatsapp || !ch.email) ? `<div class="panel notice"><div><h3>${!ch.whatsapp&&!ch.email?'Alerts aren’t set up yet':'One alert channel isn’t set up'}</h3><p class="hint">Bookings still show here. To also get them on ${[!ch.whatsapp&&'WhatsApp',!ch.email&&'email'].filter(Boolean).join(' and ')}, follow the steps in Settings.</p></div><button class="btn sm" data-tab="settings">Set up alerts</button></div>` : '';
-    m.innerHTML = head(`<button class="btn sm" data-action="go-store">Open storefront</button>`) + alertNote + `
+    const old = oldLocalData();
+    const importNote = old ? `<div class="panel notice import-note"><div><h3>Changes from the earlier version were found in this browser</h3><p class="hint">This browser still holds ${[old.products&&`${old.products.length} products`, old.services&&`${old.services.length} services`, old.realBookings&&`${old.realBookings} bookings`, old.realOrders&&`${old.realOrders} orders`].filter(Boolean).join(', ')} saved before the online database. Import them so the shop shows them. Anything already changed online is kept.</p></div><div class="a-actions"><button class="btn sm" data-action="import-local">Import changes</button><button class="btn ghost sm" data-action="dismiss-import">Dismiss</button></div></div>` : '';
+    m.innerHTML = head(`<button class="btn sm" data-action="go-store">Open storefront</button>`) + importNote + alertNote + `
       <div class="kpis">
         <div class="kpi"><span class="l">Sessions today</span><span class="v num">${todays.length}</span><span class="s">${Math.max(0,S.settings.chairs*(S.settings.close-S.settings.open)-todays.length)} chair-hours free</span></div>
         <div class="kpi"><span class="l">To confirm</span><span class="v num">${pend}</span><span class="s">Call to confirm and take the deposit</span></div>
@@ -1093,8 +1287,60 @@ function renderAdmin(){
       </tbody></table></div>`;
   }
 
+  if(tab==='visitors'){
+    if(!S.vis){ m.innerHTML = head() + '<p class="empty">Loading visitors…</p>'; if(!S.visLoading) loadVisitors(false); return; }
+    if(S.vis.error){ m.innerHTML = head() + `<div class="panel"><h3>Visitors couldn’t load</h3><p class="hint">${esc(S.vis.error)}</p></div>`; return; }
+    const v=S.vis, tt=v.totals;
+    const ago = t => { if(!t) return ''; const mins=Math.round((Date.now()-Date.parse(t))/6e4); if(mins<2) return 'Just now'; if(mins<60) return `${mins} min ago`; const h=Math.round(mins/60); if(h<24) return `${h} h ago`; const d=Math.round(h/24); return d===1?'Yesterday':`${d} days ago`; };
+    const plural = (n,w) => `${n} ${w}${n===1?'':'s'}`;
+    m.innerHTML = head() + `
+      <div class="kpis">
+        <div class="kpi"><span class="l">Visitors today</span><span class="v num">${tt.today}</span><span class="s">People who opened the site</span></div>
+        <div class="kpi"><span class="l">Last 7 days</span><span class="v num">${tt.week}</span><span class="s">${tt.month} in the last 30 days</span></div>
+        <div class="kpi"><span class="l">Came back</span><span class="v num">${tt.returning}</span><span class="s">Visited more than once</span></div>
+        <div class="kpi"><span class="l">Signed-in customers</span><span class="v num">${tt.customers}</span><span class="s">Signed in with Google</span></div>
+      </div>
+      <div class="panel"><div class="panel-head"><h3>Visitors per day</h3><span class="hint">Last 14 days, today in gold</span></div><div class="chart">${chart(v.days.map(d=>d.date), v.days.map(d=>d.visitors), {aria:'Visitors per day for the last 14 days', label:(d,i,n)=> i===n-1 ? 'Today' : String(+d.slice(8))})}</div></div>
+      <section class="a-sec">
+        <div class="panel-head"><h3>Signed-in customers</h3><span class="hint">${v.customers.length===1?'1 person':`${v.customers.length} people`}</span></div>
+        <div class="tbl-wrap"><table class="t-cards t-cust"><thead><tr><th>Customer</th><th>Phone</th><th>Activity</th><th>Last visit</th><th>First seen</th></tr></thead><tbody>
+        ${v.customers.map(c=>`<tr>
+          <td class="c-who"><div class="who-cell">${avatar(c,'md')}<span><strong>${esc(c.name)}</strong><span class="sub"><a class="tel" href="mailto:${esc(c.email)}">${esc(c.email)}</a></span></span></div></td>
+          <td class="c-phone">${c.phone?tel(c.phone):'<span class="hint">No phone yet</span>'}</td>
+          <td class="c-act">${plural(c.bookings,'booking')} · ${plural(c.orders,'order')} · ${plural(c.visits||0,'visit')}</td>
+          <td class="c-last">${ago(c.lastSeen)}</td>
+          <td class="c-first num">${c.firstSeen?fmtDate(c.firstSeen.slice(0,10)):''}</td></tr>`).join('') || `<tr><td colspan="5" class="empty">No one has signed in yet.${S.settings.googleClientId?'':' Turn on Google sign-in in Settings.'}</td></tr>`}
+        </tbody></table></div>
+      </section>
+      <section class="a-sec">
+        <div class="panel-head"><h3>Recent visitors</h3><span class="hint">Last 30 days · names show only after Google sign-in</span></div>
+        <div class="tbl-wrap"><table class="t-cards t-vis"><thead><tr><th>Visitor</th><th>Device</th><th>Came from</th><th class="r">Visits</th><th>Last seen</th><th>First seen</th></tr></thead><tbody>
+        ${v.visitors.map(x=>`<tr>
+          <td class="c-who">${x.customerName?`<strong>${esc(x.customerName)}</strong><span class="sub">Signed in · ${plural(x.visits,'visit')}</span>`:`Visitor <span class="mono">${esc(x.vid.slice(0,6))}</span><span class="sub only-phone">${plural(x.visits,'visit')}</span>`}</td>
+          <td class="c-device">${esc(x.device)} · ${esc(x.os)}</td>
+          <td class="c-src">${esc(x.source||'Direct')}</td>
+          <td class="c-visits r num">${x.visits}</td>
+          <td class="c-last">${ago(x.lastSeen)}</td>
+          <td class="c-first num">${fmtDate(x.firstSeen.slice(0,10))}</td></tr>`).join('') || '<tr><td colspan="6" class="empty">No visits counted yet. They appear here as people open the shop.</td></tr>'}
+        </tbody></table></div>
+      </section>
+      <p class="hint">Visits are counted once per browser session without IP addresses. Browsers set to “Do not track” aren’t counted, and search-engine bots are ignored.</p>`;
+  }
+
+  if(tab==='more'){
+    const row = (attr, ic, label, desc) => `<button class="more-row" ${attr}>${icon(ic)}<span><strong>${label}</strong><span class="hint">${desc}</span></span><span aria-hidden="true">›</span></button>`;
+    m.innerHTML = head() + `<div class="panel more-list">
+      ${row('data-tab="products"','products','Products',`Prices, stock and photos${counts.products?` · ${counts.products} low on stock`:''}`)}
+      ${row('data-tab="services"','services','Services','The loc menu and prices')}
+      ${row('data-tab="settings"','settings','Settings','Salon details, alerts, Google sign-in, backups')}
+      ${row('data-action="go-store"','store','View store','Open the shop as customers see it')}
+      ${row('data-action="sign-out"','signout','Sign out','End your staff session on this device')}
+    </div>`;
+  }
+
   if(tab==='settings'){
     const st=S.settings, ch=S.channels||{};
+    if(!S.backups && !S.backupsLoading){ S.backupsLoading=true; api('admin/backups').then(r=>{ S.backups=r.backups; }).catch(()=>{ S.backups=[]; }).finally(()=>{ S.backupsLoading=false; if(tab==='settings') renderAdmin(); }); }
     const f=(k,l,type='text',extra='',hint='')=>`<div class="field"><label for="set-${k}">${l}</label><input id="set-${k}" name="${k}" type="${type}" value="${esc(st[k])}" ${extra}>${hint?`<span class="hint">${hint}</span>`:''}</div>`;
     const status = on => `<span class="tag ${on?'ok':'low'}">${on?'Connected':'Not set up'}</span>`;
     m.innerHTML = head() + `
@@ -1119,27 +1365,39 @@ function renderAdmin(){
           ${f('deliveryFee','Delivery fee','number','min="0" inputmode="numeric"')}${f('freeOver','Free delivery over','number','min="0" inputmode="numeric"')}
           ${f('currency','Currency label','text','maxlength="5"')}${f('timezone','Time zone','text','placeholder="Africa/Nairobi"','Used to date orders and block past times.')}
         </div>
+        <h3>Google sign-in for customers</h3>
+        <div class="settings">
+          ${f('googleClientId','Google Client ID','text','placeholder="1234-abc.apps.googleusercontent.com" autocomplete="off" spellcheck="false"','From Google Cloud → APIs &amp; Services → Credentials. Leave empty to hide the Sign in button.')}
+          <div class="field"><span class="lbl">Status</span><span>${st.googleClientId?'<span class="tag ok">On</span>':'<span class="tag low">Off</span>'}</span></div>
+        </div>
         <div><button class="btn" type="submit">Save settings</button></div>
       </form>
+      <div class="panel">
+        <div class="panel-head"><h3>Backups</h3><a class="btn ghost sm" href="/api/admin/backup" download>Download backup now</a></div>
+        <p class="hint">Everything you add here is saved online and stays when the site is updated. A full copy of products, services, settings, bookings, orders and customers is also saved automatically every day, and the last 30 days are kept.</p>
+        <p class="hint">${S.backups ? (S.backups.length ? `Latest automatic backup: <strong>${fmtDate(S.backups[0])}</strong> · ${S.backups.length} kept` : 'The first automatic backup runs within 24 hours.') : 'Checking backups…'}</p>
+      </div>
       <div class="panel only-phone">
         <h3>This device</h3>
         <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn ghost sm" data-action="go-store">View store</button><button class="btn ghost sm" data-action="sign-out">Sign out</button></div>
       </div>`;
   }
 }
-function chart(days,vals){
+function chart(days,vals,opt={}){
+  const n=vals.length, aria=opt.aria||'Revenue for the last 7 days';
+  const label=opt.label||((d,i)=> i===n-1 ? 'Today' : new Date(d+'T00:00').toLocaleDateString(undefined,{weekday:'short'}));
   const W=600,H=230,L=52,R=10,T=22,B=30, max0=Math.max(...vals,1);
   const step=Math.pow(10,Math.floor(Math.log10(max0)))/2;
   const niceMax=Math.ceil(max0/step)*step;
-  const y=v=>T+(H-T-B)*(1-v/niceMax), bw=(W-L-R)/7;
+  const y=v=>T+(H-T-B)*(1-v/niceMax), bw=(W-L-R)/n;
   const short=v=>v>=1000?(v/1000).toFixed(v%1000===0?0:1)+'k':String(v);
   let g='';
   [0,.5,1].forEach(f=>{const v=niceMax*f; g+=`<line class="grid-l" x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}"/><text x="${L-8}" y="${y(v)+4}" text-anchor="end">${short(v)}</text>`;});
   days.forEach((d,i)=>{const x=L+i*bw+bw*.2, w=bw*.6, v=vals[i], h=(H-T-B)-(y(v)-T);
-    g+=`<rect class="bar${i===6?' today':''}" x="${x}" y="${y(v)}" width="${w}" height="${Math.max(h,0)}" rx="3"/>`;
+    g+=`<rect class="bar${i===n-1?' today':''}" x="${x}" y="${y(v)}" width="${w}" height="${Math.max(h,0)}" rx="3"/>`;
     if(v) g+=`<text class="val" x="${x+w/2}" y="${y(v)-6}" text-anchor="middle">${short(v)}</text>`;
-    g+=`<text x="${x+w/2}" y="${H-10}" text-anchor="middle">${i===6?'Today':new Date(d+'T00:00').toLocaleDateString(undefined,{weekday:'short'})}</text>`;});
-  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Revenue for the last 7 days">${g}</svg>`;
+    g+=`<text x="${x+w/2}" y="${H-10}" text-anchor="middle">${label(d,i,n)}</text>`;});
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${aria}">${g}</svg>`;
 }
 
 /* edit dialogs */
@@ -1202,14 +1460,32 @@ document.addEventListener('click', async e=>{
   if(t.dataset.ofilter){ oFilter=t.dataset.ofilter; renderAdmin(); return; }
   try {
     switch(a){
-      case 'book': openBooking(id); break;
+      case 'book': if($('#acctDlg').open) $('#acctDlg').close(); openBooking(id); break;
       case 'open-cart': openCart(); break;
       case 'close-cart': closeCart(); break;
       case 'close-dlg': t.closest('dialog').close(); break;
       case 'go-admin': location.href='/admin'; break;
       case 'go-store': if(IS_ADMIN_URL) location.href='/'; break;
       case 'sign-out': location.href='/admin/logout'; break;
-      case 'refresh': await busy(t, 'Refreshing…', ()=>loadAdmin(false)); break;
+      case 'refresh': await busy(t, 'Refreshing…', ()=>Promise.all([loadAdmin(false), tab==='visitors'?loadVisitors(false):null])); break;
+      case 'account': if($('#bookDlg').open) $('#bookDlg').close(); if(!$('#cart').hidden) closeCart(); openAccount(); break;
+      case 'customer-sign-out':
+        await api('auth/logout',{method:'POST'});
+        try { google.accounts.id.disableAutoSelect(); } catch(_){}
+        S.me=null; S.myBookings=[]; S.myOrders=[]; writeLS(SIGNED_KEY,false); renderAcct(); renderAccount(); renderCart(); toast('Signed out'); break;
+      case 'dismiss-import': writeLS(OLD_DONE_KEY, 'dismissed'); renderAdmin(); break;
+      case 'import-local': {
+        const old = oldLocalData(); if(!old) break;
+        const r = await busy(t, 'Importing…', ()=>api('admin/import',{method:'POST', body:{products:old.products, services:old.services, settings:old.settings, bookings:old.bookings, orders:old.orders}}));
+        const x = r.result, bits = [];
+        if(x.products.added||x.products.updated) bits.push(`${x.products.added+x.products.updated} products`);
+        if(x.services.added||x.services.updated) bits.push(`${x.services.added+x.services.updated} services`);
+        if(x.settings) bits.push(`${x.settings} settings`);
+        if(x.bookings) bits.push(`${x.bookings} bookings`);
+        if(x.orders) bits.push(`${x.orders} orders`);
+        writeLS(OLD_DONE_KEY, new Date().toISOString());
+        toast(bits.length ? `Imported ${bits.join(', ')}` : 'Nothing new to import. Everything was already online.');
+        await loadAdmin(true); break; }
       case 'add': {
         const p=S.products.find(x=>x.id===id), c=cart.find(x=>x.id===id);
         if(c){ if(c.qty>=p.stock){ toast(`Only ${p.stock} in stock`); break; } c.qty++; } else cart.push({id,qty:1});
@@ -1273,7 +1549,7 @@ document.addEventListener('submit', async e=>{
     try {
       const r = await busy(btn, 'Sending…', ()=>api('bookings',{method:'POST', body:{name, phone, serviceId:$('#bSvc').value, date:$('#bDate').value, time:pickedSlot, notes:$('#bNotes').value.trim(), website:$('#bWebsite').value}}));
       const k=`${r.booking.date} ${r.booking.time}`; S.taken[k]=(S.taken[k]||0)+1;
-      $('#bookDlg').close(); f.reset(); renderStore(); showDone('booking', r.booking);
+      $('#bookDlg').close(); f.reset(); renderStore(); showDone('booking', r.booking); if(S.me) loadMe();
     } catch(ex){
       err.textContent=ex.message; err.hidden=false;
       if(/taken/i.test(ex.message)){ await loadCatalog(); renderDays(); renderSlots(); }
@@ -1286,7 +1562,7 @@ document.addEventListener('submit', async e=>{
     err.hidden=true;
     try {
       const r = await busy(btn, 'Placing order…', ()=>api('orders',{method:'POST', body:{name, phone, address:addr, fulfilment:ful, items:cart, website:$('#cWebsite').value}}));
-      S.products=r.products; cart=[]; saveCart(); closeCart(); renderStore(); showDone('order', r.order);
+      S.products=r.products; cart=[]; saveCart(); closeCart(); renderStore(); showDone('order', r.order); if(S.me) loadMe();
     } catch(ex){ err.textContent=ex.message; err.hidden=false; loadCatalog(); }
   }
   if(f.id==='editForm'){
@@ -1299,6 +1575,12 @@ document.addEventListener('submit', async e=>{
       if(isP) S.products=r.products; else S.services=r.services;
       $('#editDlg').close(); renderAdmin(); toast(id?'Changes saved':`${isP?'Product':'Service'} added`);
     } catch(ex){ er.textContent=ex.message; er.hidden=false; }
+  }
+  if(f.id==='meForm'){
+    try {
+      const r = await busy(btn, 'Saving…', ()=>api('me',{method:'PUT', body:{phone:$('#mePhone').value.trim()}}));
+      S.me = r.me; toast('Phone saved');
+    } catch(ex){ toast(ex.message); }
   }
   if(f.id==='settingsForm'){
     const d=Object.fromEntries(new FormData(f));
@@ -1318,11 +1600,13 @@ matchMedia('(max-width:760px)').addEventListener?.('change', ()=>{ if(!$('#admin
 /* Admin lives at /admin, which Netlify only serves after staff sign-in (netlify/edge-functions/admin-auth.js). */
 if(IS_ADMIN_URL){
   show('admin'); loadAdmin(false);
-  setInterval(()=>{ if(document.visibilityState==='visible') loadAdmin(true); }, 60000);
+  setInterval(()=>{ if(document.visibilityState!=='visible') return; loadAdmin(true); if(tab==='visitors') loadVisitors(true); }, 60000);
   document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible' && S.loaded) loadAdmin(true); });
 } else {
   show('store');
-  loadCatalog().then(()=>{ if(location.hash==='#book') openBooking(); });
+  loadCatalog().then(()=>{ renderAcct(); if(location.hash==='#book') openBooking(); });
+  trackVisit();
+  if(readLS(SIGNED_KEY)) loadMe();
   /* pick up admin changes (prices, stock, open times) while the shop stays open */
   let lastLoad = Date.now();
   const refreshShop = () => { if(document.visibilityState!=='visible' || Date.now()-lastLoad < 20000) return; if($('#bookDlg').open || !$('#cart').hidden) return; lastLoad = Date.now(); loadCatalog(true); };

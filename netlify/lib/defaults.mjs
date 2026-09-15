@@ -37,6 +37,7 @@ export const DEFAULT_SETTINGS = {
   close: 18,
   timezone: "Africa/Nairobi",
   whatsapp: "",
+  googleClientId: "",
   phone: "Add your phone number in Admin → Settings",
   address: "Add your salon address in Admin → Settings",
   hours: "Mon–Sat, 8:00–18:00 · Sun by appointment",

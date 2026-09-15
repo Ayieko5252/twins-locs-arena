@@ -26,6 +26,25 @@ function readCookie(req, name) {
   return "";
 }
 
+/* customer sessions (Sign in with Google) */
+export const USER_COOKIE = "tla_user";
+export const USER_SESSION_DAYS = 30;
+
+export async function makeUserCookie(sub) {
+  const exp = Math.floor(Date.now() / 1000) + USER_SESSION_DAYS * 86400;
+  const token = `${Buffer.from(sub).toString("base64url")}.${exp}.${await hmac(`user:${sub}:${exp}`)}`;
+  return `${USER_COOKIE}=${token}; Path=/; Max-Age=${USER_SESSION_DAYS * 86400}; HttpOnly; Secure; SameSite=Lax`;
+}
+export const clearUserCookie = () => `${USER_COOKIE}=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Lax`;
+
+export async function userFromRequest(req) {
+  if (!env("ADMIN_SECRET")) return null;
+  const [s64, exp, sig] = readCookie(req, USER_COOKIE).split(".");
+  if (!s64 || !exp || !sig || Number(exp) < Date.now() / 1000) return null;
+  const sub = Buffer.from(s64, "base64url").toString();
+  return (await safeEqual(sig, await hmac(`user:${sub}:${exp}`))) ? sub : null;
+}
+
 export async function isAdmin(req) {
   if (!env("ADMIN_SECRET") || !env("ADMIN_USER")) return false;
   const token = readCookie(req, "tla_admin");
