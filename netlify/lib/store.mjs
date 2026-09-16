@@ -5,8 +5,15 @@
 import { getStore } from "@netlify/blobs";
 import { DEFAULT_PRODUCTS, DEFAULT_SERVICES, DEFAULT_SETTINGS } from "./defaults.mjs";
 
-export const storeName = (context) => ((context?.deploy?.context ?? "production") === "production" ? "tla" : "tla-preview");
-export const storeFor = (context) => getStore({ name: storeName(context), consistency: "strong" });
+// The live domain always uses the real data, whatever kind of deploy serves it.
+// Preview links (<deploy-id>--site.netlify.app) and local dev use a separate test store.
+export function storeName(context, req) {
+  let host = "";
+  try { host = req ? new URL(req.url).hostname : ""; } catch {}
+  if (host) return /(^|\.)[0-9a-z]{6,}--/.test(host) || /^(localhost|127\.0\.0\.1|\[::1\])$/.test(host) ? "tla-preview" : "tla";
+  return (context?.deploy?.context ?? "production") === "production" ? "tla" : "tla-preview";
+}
+export const storeFor = (context, req) => getStore({ name: storeName(context, req), consistency: "strong" });
 
 export const addDays = (d, n) => new Date(Date.parse(`${d}T00:00:00Z`) + n * 864e5).toISOString().slice(0, 10);
 

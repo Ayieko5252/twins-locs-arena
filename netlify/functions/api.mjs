@@ -526,10 +526,10 @@ export default async (req, context) => {
   const url = new URL(req.url);
   const parts = url.pathname.replace(/^\/api\/?/, "").split("/").filter(Boolean);
   const method = req.method;
-  const store = storeFor(context);
+  const store = storeFor(context, req);
 
   try {
-    if (parts[0] === "health") return json({ ok: true, context: context?.deploy?.context ?? null, store: storeName(context) });
+    if (parts[0] === "health") return json({ ok: true, context: context?.deploy?.context ?? null, store: storeName(context, req) });
     if (parts[0] === "catalog" && method === "GET") return await catalog(store);
     if (parts[0] === "img" && parts[1] && method === "GET") return await serveImage(store, parts[1]);
     if (parts[0] === "bookings" && method === "POST") return await createBooking(req, store, context);
