@@ -1161,6 +1161,7 @@ async function loadAdmin(quiet){
       if(fresh) toast(`${fresh} new ${fresh===1?'request has':'requests have'} come in`);
     }
     renderAdmin();
+    if(!wasLoaded) autoImport();
   } catch(e){
     if(!quiet) toast(e.message);
     if(!S.loaded) $('#adminMain').innerHTML = `<div class="panel"><h3>The admin couldn't load</h3><p class="hint">${esc(e.message)}</p><div><button class="btn sm" data-action="refresh">Try again</button></div></div>`;
@@ -1177,10 +1178,53 @@ async function loadVisitors(quiet){
 /* Data saved in this browser by the first version of the admin, before the online database. */
 const OLD_KEY = 'tla-store-v1', OLD_DONE_KEY = 'tla-store-v1-imported';
 const OLD_SAMPLE = new Set(['TLA-B1031','TLA-B1034','TLA-B1035','TLA-B1037','TLA-B1039','TLA-B1042','TLA-B1043','TLA-B1044','TLA-B1045','TLA-B1046','TLA-O2201','TLA-O2204','TLA-O2207','TLA-O2209','TLA-O2210']);
-function oldLocalData(){
+function oldLocalData(includeDismissed){
   const d = readLS(OLD_KEY);
-  if(!d || d.sample!==false || readLS(OLD_DONE_KEY)) return null;
-  return {...d, realBookings:(d.bookings||[]).filter(b=>!OLD_SAMPLE.has(b.id)).length, realOrders:(d.orders||[]).filter(o=>!OLD_SAMPLE.has(o.id)).length};
+  if(!d || !d.products) return null;
+  if(!includeDismissed && (d.sample!==false || readLS(OLD_DONE_KEY))) return null;
+  const onlineNames = new Set(S.products.map(x=>x.name));
+  const onlineSvc = new Set(S.services.map(x=>x.name));
+  return {
+    ...d,
+    missingProducts: (d.products||[]).filter(x=>x && x.name && !onlineNames.has(x.name)),
+    missingServices: (d.services||[]).filter(x=>x && x.name && !onlineSvc.has(x.name)),
+    withPhotos: (d.products||[]).filter(x=>x && typeof x.img==='string' && x.img.startsWith('data:image/')).length,
+    realBookings:(d.bookings||[]).filter(b=>!OLD_SAMPLE.has(b.id)).length,
+    realOrders:(d.orders||[]).filter(o=>!OLD_SAMPLE.has(o.id)).length,
+  };
+}
+function importSummary(old){
+  const bits = [];
+  if(old.missingProducts.length) bits.push(`${old.missingProducts.length} products the shop doesn’t have yet`);
+  if(old.missingServices.length) bits.push(`${old.missingServices.length} services`);
+  if(old.withPhotos) bits.push(`${old.withPhotos} product photos`);
+  if(old.realBookings) bits.push(`${old.realBookings} bookings`);
+  if(old.realOrders) bits.push(`${old.realOrders} orders`);
+  if(!bits.length) bits.push(`${(old.products||[]).length} products and ${(old.services||[]).length} services, including any prices you changed`);
+  return bits.join(', ');
+}
+async function autoImport(){
+  const old = oldLocalData();
+  if(!old) return;
+  try {
+    const x = await runImport(null, old, true);
+    const n = x.products.added + x.products.updated;
+    if(n || x.services.added || x.services.updated || x.bookings || x.orders)
+      toast(`Recovered ${n} products saved in this browser into the shop`);
+  } catch(e){ console.error(e); }
+}
+async function runImport(btn, data, quiet){
+  const r = await busy(btn, 'Importing…', ()=>api('admin/import',{method:'POST', body:{products:data.products, services:data.services, settings:data.settings, bookings:data.bookings, orders:data.orders}}));
+  const x = r.result, bits = [];
+  if(x.products.added||x.products.updated) bits.push(`${x.products.added+x.products.updated} products`);
+  if(x.services.added||x.services.updated) bits.push(`${x.services.added+x.services.updated} services`);
+  if(x.settings) bits.push(`${x.settings} settings`);
+  if(x.bookings) bits.push(`${x.bookings} bookings`);
+  if(x.orders) bits.push(`${x.orders} orders`);
+  writeLS(OLD_DONE_KEY, new Date().toISOString());
+  if(!quiet) toast(bits.length ? `Imported ${bits.join(', ')} into the shop` : 'Nothing new to import. Everything was already online.');
+  await loadAdmin(true);
+  return x;
 }
 
 function renderAdmin(){
@@ -1193,7 +1237,9 @@ function renderAdmin(){
   if(tab==='settings') $('#aBarSettings').setAttribute('aria-current','page'); else $('#aBarSettings').removeAttribute('aria-current');
   const m=$('#adminMain'), title=(TABS.find(t=>t[0]===tab)||TABS[0])[1];
   if(!S.loaded){ m.innerHTML = `<div class="a-top"><div><span class="eyebrow">${fmtDate(today())}</span><h1>${title}</h1></div></div><p class="empty">Loading bookings and orders…</p>`; return; }
-  const head = (actions='') => `<div class="a-top"><div><span class="eyebrow">${fmtDate(today())}</span><h1>${title}</h1></div><div class="a-actions"><button class="btn ghost sm keep" data-action="refresh">Refresh</button>${actions}</div></div>`;
+  const pending = oldLocalData();
+  const banner = pending ? `<div class="panel notice import-note"><div><h3>Products saved in this browser aren’t in the shop yet</h3><p class="hint">This browser holds ${importSummary(pending)} from the older version of this page, which saved only on this device. Import them so customers can see them. Anything already changed online is kept.</p>${pending.missingProducts.length?`<p class="hint">Not in the shop: ${pending.missingProducts.slice(0,6).map(x=>esc(x.name)).join(', ')}${pending.missingProducts.length>6?` and ${pending.missingProducts.length-6} more`:''}</p>`:''}</div><div class="a-actions"><button class="btn sm" data-action="import-local">Import into the shop</button><button class="btn ghost sm" data-action="dismiss-import">Not now</button></div></div>` : '';
+  const head = (actions='') => `<div class="a-top"><div><span class="eyebrow">${fmtDate(today())}</span><h1>${title}</h1></div><div class="a-actions"><button class="btn ghost sm keep" data-action="refresh">Refresh</button>${actions}</div></div>` + banner;
   const td=today();
 
   if(tab==='overview'){
@@ -1204,9 +1250,7 @@ function renderAdmin(){
     const week=rev.reduce((a,b)=>a+b,0);
     const ch=S.channels||{};
     const alertNote = (!ch.whatsapp || !ch.email) ? `<div class="panel notice"><div><h3>${!ch.whatsapp&&!ch.email?'Alerts aren’t set up yet':'One alert channel isn’t set up'}</h3><p class="hint">Bookings still show here. To also get them on ${[!ch.whatsapp&&'WhatsApp',!ch.email&&'email'].filter(Boolean).join(' and ')}, follow the steps in Settings.</p></div><button class="btn sm" data-tab="settings">Set up alerts</button></div>` : '';
-    const old = oldLocalData();
-    const importNote = old ? `<div class="panel notice import-note"><div><h3>Changes from the earlier version were found in this browser</h3><p class="hint">This browser still holds ${[old.products&&`${old.products.length} products`, old.services&&`${old.services.length} services`, old.realBookings&&`${old.realBookings} bookings`, old.realOrders&&`${old.realOrders} orders`].filter(Boolean).join(', ')} saved before the online database. Import them so the shop shows them. Anything already changed online is kept.</p></div><div class="a-actions"><button class="btn sm" data-action="import-local">Import changes</button><button class="btn ghost sm" data-action="dismiss-import">Dismiss</button></div></div>` : '';
-    m.innerHTML = head(`<button class="btn sm" data-action="go-store">Open storefront</button>`) + importNote + alertNote + `
+    m.innerHTML = head(`<button class="btn sm" data-action="go-store">Open storefront</button>`) + alertNote + `
       <div class="kpis">
         <div class="kpi"><span class="l">Sessions today</span><span class="v num">${todays.length}</span><span class="s">${Math.max(0,S.settings.chairs*(S.settings.close-S.settings.open)-todays.length)} chair-hours free</span></div>
         <div class="kpi"><span class="l">To confirm</span><span class="v num">${pend}</span><span class="s">Call to confirm and take the deposit</span></div>
@@ -1373,6 +1417,16 @@ function renderAdmin(){
         <div><button class="btn" type="submit">Save settings</button></div>
       </form>
       <div class="panel">
+        <div class="panel-head"><h3>Import &amp; restore</h3></div>
+        ${(() => { const old = oldLocalData(true); return old
+          ? `<p class="hint">This browser holds ${importSummary(old)} from the older version of this page.${old.missingProducts.length?` Not in the shop yet: <strong>${old.missingProducts.slice(0,8).map(x=>esc(x.name)).join(', ')}</strong>.`:''}</p>
+             <div class="a-actions"><button class="btn sm" data-action="import-local">Import from this browser</button></div>`
+          : `<p class="hint">Nothing from the older version is saved in this browser. If you added products on another device or browser, open this admin there and check this panel again.</p>`; })()}
+        <p class="hint">You can also restore from a backup file downloaded below.</p>
+        <div class="a-actions"><label class="btn ghost sm" for="restoreFile">Choose backup file…</label><input id="restoreFile" type="file" accept="application/json,.json" class="hp"></div>
+        <p class="hint">Importing never deletes anything: it adds what is missing and leaves anything you changed online as it is.</p>
+      </div>
+      <div class="panel">
         <div class="panel-head"><h3>Backups</h3><a class="btn ghost sm" href="/api/admin/backup" download>Download backup now</a></div>
         <p class="hint">Everything you add here is saved online and stays when the site is updated. A full copy of products, services, settings, bookings, orders and customers is also saved automatically every day, and the last 30 days are kept.</p>
         <p class="hint">${S.backups ? (S.backups.length ? `Latest automatic backup: <strong>${fmtDate(S.backups[0])}</strong> · ${S.backups.length} kept` : 'The first automatic backup runs within 24 hours.') : 'Checking backups…'}</p>
@@ -1475,17 +1529,9 @@ document.addEventListener('click', async e=>{
         S.me=null; S.myBookings=[]; S.myOrders=[]; writeLS(SIGNED_KEY,false); renderAcct(); renderAccount(); renderCart(); toast('Signed out'); break;
       case 'dismiss-import': writeLS(OLD_DONE_KEY, 'dismissed'); renderAdmin(); break;
       case 'import-local': {
-        const old = oldLocalData(); if(!old) break;
-        const r = await busy(t, 'Importing…', ()=>api('admin/import',{method:'POST', body:{products:old.products, services:old.services, settings:old.settings, bookings:old.bookings, orders:old.orders}}));
-        const x = r.result, bits = [];
-        if(x.products.added||x.products.updated) bits.push(`${x.products.added+x.products.updated} products`);
-        if(x.services.added||x.services.updated) bits.push(`${x.services.added+x.services.updated} services`);
-        if(x.settings) bits.push(`${x.settings} settings`);
-        if(x.bookings) bits.push(`${x.bookings} bookings`);
-        if(x.orders) bits.push(`${x.orders} orders`);
-        writeLS(OLD_DONE_KEY, new Date().toISOString());
-        toast(bits.length ? `Imported ${bits.join(', ')}` : 'Nothing new to import. Everything was already online.');
-        await loadAdmin(true); break; }
+        const old = oldLocalData(true);
+        if(!old){ toast('Nothing from the older version is saved in this browser.'); break; }
+        await runImport(t, old); break; }
       case 'add': {
         const p=S.products.find(x=>x.id===id), c=cart.find(x=>x.id===id);
         if(c){ if(c.qty>=p.stock){ toast(`Only ${p.stock} in stock`); break; } c.qty++; } else cart.push({id,qty:1});
@@ -1533,6 +1579,15 @@ document.addEventListener('change', async e=>{
     const p=S.products.find(x=>x.id===t.dataset.stock), stock=Math.max(0,parseInt(t.value)||0);
     try { const r=await api('admin/products',{method:'PUT', body:{item:{...p, stock}}}); S.products=r.products; renderAdmin(); toast(`Stock updated: ${p.name} (${stock})`); }
     catch(err){ renderAdmin(); toast(err.message); }
+  }
+  if(t.id==='restoreFile' && t.files[0]){
+    const file = t.files[0]; t.value='';
+    try {
+      const data = JSON.parse(await file.text());
+      const payload = data.catalog ? {products:data.catalog.products, services:data.catalog.services, settings:data.catalog.settings, bookings:data.bookings, orders:data.orders} : data;
+      if(!payload.products && !payload.services && !payload.bookings && !payload.orders){ toast('That file doesn’t look like a backup from this site.'); return; }
+      await runImport(null, payload);
+    } catch(err){ toast(err.message || 'That file couldn’t be read.'); }
   }
   if(t.id==='e-img' && t.files[0]){
     try{ pendingImg=await shrinkImage(t.files[0]); }catch(_){ $('#eErr').textContent='That file couldn’t be read as an image. Try a JPG or PNG.'; $('#eErr').hidden=false; }
