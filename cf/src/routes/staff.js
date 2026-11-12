@@ -254,6 +254,11 @@ export async function staffRoutes(parts, request, env, ctx) {
       const department = oneOf(str(body.department, 20), Object.keys(DEPARTMENTS), "employee");
       let role = oneOf(str(body.role, 10), Object.keys(ROLES), "staff");
       if (role === "owner" && staff.role !== "owner") return fail(403, "Only the owner can create another owner.");
+      // Only management may put someone into management: otherwise a department
+      // head could create an account there and then take over everything.
+      if (department === "management" && staff.department !== "management") {
+        return fail(403, "Only management can create a management account.");
+      }
       if (await env.DB.prepare("SELECT id FROM employees WHERE email = ?1").bind(email).first()) return fail(409, "Someone already has that email address.");
 
       const id = newId("emp");
@@ -278,11 +283,21 @@ export async function staffRoutes(parts, request, env, ctx) {
       if (role === "owner" && staff.role !== "owner") return fail(403, "Only the owner can make someone an owner.");
       const status = oneOf(str(body.status, 12), ["active", "suspended"], target.status);
       if (target.id === staff.id && status !== "active") return fail(400, "You can’t suspend your own account.");
+      const department = oneOf(str(body.department, 20), Object.keys(DEPARTMENTS), target.department);
+      if (staff.department !== "management") {
+        // A department head stays in their own lane.
+        if (department === "management" || target.department === "management") {
+          return fail(403, "Only management can change a management account.");
+        }
+        if (target.id === staff.id && (role !== target.role || department !== target.department)) {
+          return fail(403, "You cannot change your own department or role.");
+        }
+      }
 
       await env.DB.prepare(`UPDATE employees SET name = ?2, phone = ?3, title = ?4, department = ?5, role = ?6, status = ?7,
                             pay_rate_cents = ?8, hired_on = COALESCE(?9, hired_on) WHERE id = ?1`)
         .bind(target.id, str(body.name, 80) || target.name, phoneDigits(body.phone), str(body.title, 60),
-          oneOf(str(body.department, 20), Object.keys(DEPARTMENTS), target.department), role, status,
+          department, role, status,
           can(staff, "staff.pay") && body.payRate !== undefined ? int(body.payRate) * 100 : target.pay_rate_cents,
           str(body.hiredOn, 10) || null).run();
       if (status === "suspended") await destroySubjectSessions(env.DB, "staff", target.id);
@@ -296,6 +311,9 @@ export async function staffRoutes(parts, request, env, ctx) {
       const target = await env.DB.prepare("SELECT * FROM employees WHERE id = ?1").bind(str(body.id, 40)).first();
       if (!target) return fail(404, "That employee record is gone.");
       if (target.role === "owner" && staff.role !== "owner") return fail(403, "Only the owner can reset the owner’s password.");
+      if (target.department === "management" && staff.department !== "management") {
+        return fail(403, "Only management can reset a management password.");
+      }
       const temporary = `${target.name.split(" ")[0].slice(0, 6) || "Locs"}-${Math.floor(1000 + Math.random() * 9000)}!`;
       await env.DB.prepare("UPDATE employees SET password_hash = ?2, must_change = 1 WHERE id = ?1").bind(target.id, await hashPassword(temporary)).run();
       await destroySubjectSessions(env.DB, "staff", target.id);

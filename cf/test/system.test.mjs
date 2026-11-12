@@ -21,6 +21,16 @@ test("a password can be checked but never read back", async () => {
   assert.equal(await verifyPassword("x", null), false);
 });
 
+test("password hashing stays inside what Cloudflare Workers allow", async () => {
+  // Workers' WebCrypto refuses PBKDF2 above 100,000 rounds. Going over it makes
+  // every sign-in fail as if the password were wrong, which is how it got missed.
+  const stored = await hashPassword("TestPass2026x");
+  const rounds = Number(stored.split("$")[1]);
+  assert.ok(rounds <= 100000, `uses ${rounds} rounds, which Workers would refuse`);
+  assert.ok(rounds >= 100000, "and not fewer than the limit, so it stays strong");
+  assert.equal(await verifyPassword("TestPass2026x", stored), true);
+});
+
 test("two people with the same password get different stored values", async () => {
   const a = await hashPassword("TestPass2026x", 10000);
   const b = await hashPassword("TestPass2026x", 10000);

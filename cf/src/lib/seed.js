@@ -10,8 +10,8 @@ export const DEFAULT_SETTINGS = {
   deliveryFee: 300,
   freeOver: 5000,
   chairs: 2,
-  open: 8,
-  close: 18,
+  open: 0,   // clients may book at any hour, including night visits
+  close: 24,
   vatPct: 16,
   vatInclusive: 1,
   defaultMarkupPct: 60,
@@ -24,7 +24,7 @@ export const DEFAULT_SETTINGS = {
   salesEmail: "sales@twinslocsarena.com",
   bookingsEmail: "bookings@twinslocsarena.com",
   address: "Add your salon address in Settings",
-  hours: "Mon-Sat, 8:00-18:00 · Sun by appointment",
+  hours: "Open 24 hours, 7 days a week",
   googleClientId: "",
   googleSiteVerification: "", // the code Google Search Console gives you
   loyaltyVisitsForReward: 6,

@@ -2,7 +2,7 @@
 // Nothing here ever stores or returns a password.
 
 const enc = new TextEncoder();
-const PBKDF2_ROUNDS = 210000; // OWASP 2023 guidance for PBKDF2-HMAC-SHA256
+const PBKDF2_ROUNDS = 100000; // the most Cloudflare Workers' WebCrypto allows
 export const STAFF_IDLE_SECONDS = 45 * 60;
 export const STAFF_MAX_SECONDS = 12 * 60 * 60;
 export const CUSTOMER_IDLE_SECONDS = 30 * 24 * 60 * 60;

@@ -9,11 +9,16 @@ workers_dev = true
 [assets]
 directory = "./public"
 binding = "ASSETS"
+# The Worker answers first so every page carries its security headers, and it
+# does its own routing, so the asset server must not rewrite paths.
+run_worker_first = true
+html_handling = "none"
+not_found_handling = "none"
 
 [[d1_databases]]
 binding = "DB"
 database_name = "twins-locs-arena"
-database_id = "placeholder-set-by-wrangler-d1-create"
+database_id = "62a4b1ec-8f49-4c84-b842-0a21cb2d2201"
 
 # Uploaded product photos, receipts and filing-cabinet documents.
 [[r2_buckets]]

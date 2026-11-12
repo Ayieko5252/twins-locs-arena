@@ -4,6 +4,8 @@
 import { ensureSeeded, getSettings } from "./lib/db.js";
 import { fail, json, serveFile } from "./lib/util.js";
 import { sameOrigin, securityHeaders, cleanupSessions } from "./lib/security.js";
+import { can } from "./lib/perms.js";
+import { currentStaff } from "./routes/staff.js";
 import { publicRoutes } from "./routes/public.js";
 import { customerRoutes } from "./routes/customer.js";
 import { staffRoutes } from "./routes/staff.js";
@@ -22,8 +24,9 @@ export default {
     try {
       if (!env.DB) return new Response("The database isn’t connected yet.", { status: 503 });
 
-      // Files (product photos, receipts, department documents) come from R2.
-      if (path.startsWith("/file/")) return serveFile(env.FILES, decodeURIComponent(path.slice(6)));
+      // Files come from R2. Only shop photos are public: everything else needs a
+      // signed-in staff member, and the nightly backups are never served here.
+      if (path.startsWith("/file/")) return serveStoredFile(decodeURIComponent(path.slice(6)), request, env);
 
       if (path.startsWith(API_PREFIX)) {
         if (!sameOrigin(request)) return fail(403, "That request didn’t come from this site.");
@@ -45,7 +48,9 @@ export default {
 
       // Everything else is the public website.
       const settings = await getSettings(env.DB).catch(() => ({}));
-      const asset = await env.ASSETS.fetch(request);
+      const assetUrl = new URL(request.url);
+      if (path === "/") assetUrl.pathname = "/index.html";
+      const asset = await env.ASSETS.fetch(new Request(assetUrl, request));
       let res = new Response(asset.body, asset);
       const isHtml = (res.headers.get("content-type") || "").includes("text/html");
       for (const [k, v] of Object.entries(securityHeaders({ page: isHtml, googleSignIn: Boolean(settings.googleClientId) }))) res.headers.set(k, v);
@@ -71,6 +76,24 @@ export default {
     ctx.waitUntil(nightly(env));
   },
 };
+
+/* Who may read which files.
+   products/  shop photos, public
+   docs/      department documents, staff with documents.view
+   receipts/  expense receipts, staff with expenses.view
+   anything else (backups/) is never reachable over the web. */
+async function serveStoredFile(key, request, env) {
+  if (!key || key.includes("..")) return fail(404, "Not found");
+  if (key.startsWith("products/")) return serveFile(env.FILES, key);
+
+  const needed = key.startsWith("docs/") ? "documents.view" : key.startsWith("receipts/") ? "expenses.view" : null;
+  if (!needed) return fail(404, "Not found");
+
+  const staff = await currentStaff(request, env);
+  if (!staff) return fail(401, "Sign in to open this file.");
+  if (!can(staff, needed)) return fail(403, "Your account does not have access to that file.");
+  return serveFile(env.FILES, key);
+}
 
 // Used by the first request after a fresh deploy and by the setup page.
 export async function bootstrap(env) {

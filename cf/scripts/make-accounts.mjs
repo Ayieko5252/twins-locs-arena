@@ -15,7 +15,7 @@ if (!password) {
   console.error("  node scripts/make-accounts.mjs <password>");
   process.exit(1);
 }
-const ROUNDS = 210000;
+const ROUNDS = 100000; // must match src/lib/security.js, and Workers caps it here
 
 const hash = (plain) => {
   const salt = randomBytes(16);
