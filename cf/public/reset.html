@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Choose a new password · Twins Locs Arena</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Figtree:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="/brand.css">
+</head>
+<body>
+<main class="auth">
+  <form class="auth-card" id="form" novalidate>
+    <img src="/logo.svg" alt="Twins Locs Arena" width="260" height="146" style="margin:0 auto;display:block">
+    <h1>Choose a new password</h1>
+    <p class="hint">This link works once and then expires.</p>
+    <p class="err" id="err" hidden></p>
+    <div class="field"><label for="pass">New password</label><input id="pass" type="password" autocomplete="new-password" required>
+      <span class="hint">At least 10 characters, with letters and numbers.</span></div>
+    <div class="field"><label for="pass2">Type it again</label><input id="pass2" type="password" autocomplete="new-password" required></div>
+    <button class="btn block" type="submit">Save new password</button>
+    <a class="hint" href="/" style="text-align:center">Back to the shop</a>
+  </form>
+</main>
+<script src="/reset.js" defer></script>
+</body>
+</html>

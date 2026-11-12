@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>New staff password · Twins Locs Arena</title>
+<link rel="icon" href="/icons/icon-192.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Figtree:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="/brand.css">
+</head>
+<body>
+<main class="auth">
+  <form class="auth-card" id="form" novalidate>
+    <span class="eyebrow">Twins Locs Arena · Staff</span>
+    <h1>Choose a new password</h1>
+    <p class="hint">This link works once. Pick something you have not used anywhere else.</p>
+    <p class="err" id="err" hidden></p>
+    <div class="field"><label for="pass">New password</label><input id="pass" type="password" autocomplete="new-password" required>
+      <span class="hint">At least 10 characters, with letters and numbers.</span></div>
+    <div class="field"><label for="pass2">Type it again</label><input id="pass2" type="password" autocomplete="new-password" required></div>
+    <button class="btn block" type="submit">Save new password</button>
+    <a class="hint" href="/staff" style="text-align:center">Back to sign in</a>
+  </form>
+</main>
+<script nonce="__NONCE__">
+(() => {
+const $ = (s) => document.querySelector(s);
+const token = new URLSearchParams(location.search).get("token") || "";
+if (!token) { $("#err").textContent = "That link is incomplete. Ask for a new reset email."; $("#err").hidden = false; }
+$("#form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const err = $("#err");
+  err.hidden = true;
+  if ($("#pass").value !== $("#pass2").value) { err.textContent = "The two passwords don’t match."; err.hidden = false; return; }
+  const btn = e.target.querySelector("button");
+  btn.disabled = true; btn.textContent = "Saving…";
+  try {
+    const res = await fetch("/api/staff/reset", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-TLA-App": "1" },
+      credentials: "same-origin",
+      body: JSON.stringify({ token, password: $("#pass").value }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || "That didn’t work.");
+    location.href = "/staff";
+  } catch (ex) {
+    err.textContent = ex.message; err.hidden = false;
+    btn.disabled = false; btn.textContent = "Save new password";
+  }
+});
+})();
+</script>
+</body>
+</html>

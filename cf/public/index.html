@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Twins Locs Arena · Loc salon in Nairobi | Starter locs, retwists, loc care</title>
+<meta name="description" content="Twins Locs Arena is a loc salon in Nairobi. Book starter locs, retwists, interlocking, microlocs, repairs and loc styling, and shop residue-free loc care products. Call +254 113 394402.">
+<link rel="canonical" href="https://www.twinslocsarena.com/">
+<meta name="theme-color" content="#E9CB98" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1B100A" media="(prefers-color-scheme: dark)">
+<meta name="robots" content="index, follow, max-image-preview:large">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Twins Locs Arena">
+<meta property="og:title" content="Twins Locs Arena · Loc salon in Nairobi">
+<meta property="og:description" content="Starter locs, retwists, interlocking and loc care by twin locticians. Book a chair or shop loc care products.">
+<meta property="og:url" content="https://www.twinslocsarena.com/">
+<meta property="og:image" content="https://www.twinslocsarena.com/icons/icon-512.png">
+<meta property="og:locale" content="en_KE">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Twins Locs Arena · Loc salon in Nairobi">
+<meta name="twitter:description" content="Book starter locs, retwists and loc care. Enjoy the beauty in locs.">
+<meta name="twitter:image" content="https://www.twinslocsarena.com/icons/icon-512.png">
+
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/icons/icon-180.png">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="apple-mobile-web-app-title" content="Twins Locs">
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Figtree:wght@400;500;600;700&family=Nunito:ital,wght@1,900&family=IBM+Plex+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="/brand.css">
+<link rel="stylesheet" href="/shop.css">
+</head>
+<body>
+<a class="skip" href="#services">Skip to the loc menu</a>
+
+<header class="nav">
+  <div class="wrap">
+    <a class="brand" href="#top" aria-label="Twins Locs Arena home">
+      <img src="/favicon.svg" alt="" width="36" height="36" class="brand-mark">
+      <span>Twins Locs Arena</span>
+    </a>
+    <nav class="nav-links" aria-label="Main">
+      <a href="#services">Services</a>
+      <a href="#shop">Shop</a>
+      <a href="#how">How booking works</a>
+      <a href="#visit">Visit</a>
+    </nav>
+    <div class="nav-actions">
+      <button class="btn ghost sm" data-action="open-cart">Bag <span class="bag-count num" id="bagCount">0</span></button>
+      <button class="acct-btn" id="acctBtn" data-action="account" hidden></button>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+  <!-- hero: the twins facing each other, as in the logo -->
+  <section class="hero" id="home">
+    <div class="wrap">
+      <div class="twin">
+        <div class="face left">
+          <span class="eyebrow">The chair</span>
+          <h1>Book a loc session</h1>
+          <p>Starter locs, retwists, interlocking, repairs and styling, done by twin locticians who know your locs.</p>
+          <div class="meta">
+            <span class="slot-note" id="nextSlot">Checking open times…</span>
+            <button class="btn" data-action="book">Book a session</button>
+          </div>
+        </div>
+        <div class="centre">
+          <img src="/logo.svg" alt="Twins Locs Arena - two people with locs facing each other" width="420" height="235" class="logo" fetchpriority="high">
+        </div>
+        <div class="face right">
+          <span class="eyebrow">The shelf</span>
+          <h2>Shop loc care</h2>
+          <p>The products we use in the chair: residue-free wash, rosewater spritz, locking gel and gold loc cuffs.</p>
+          <div class="meta">
+            <span class="slot-note" id="shelfNote"></span>
+            <a class="btn gold" href="#shop">Shop products</a>
+          </div>
+        </div>
+      </div>
+      <p class="tagline">Enjoy the beauty in locs</p>
+      <div class="offers" id="offers" hidden></div>
+    </div>
+  </section>
+
+  <section class="block alt" id="services" aria-labelledby="servicesH">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <span class="eyebrow">Price list</span>
+          <h2 id="servicesH">The loc menu</h2>
+          <p>Prices are starting prices for shoulder-length hair. Longer or thicker locs may cost more, and we confirm the final price before we start.</p>
+        </div>
+        <div class="chips scroll" id="svcFilters" role="group" aria-label="Filter services"></div>
+      </div>
+      <div class="board" id="menu"><p class="empty">Loading the loc menu…</p></div>
+    </div>
+  </section>
+
+  <section class="block" id="shop" aria-labelledby="shopH">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <span class="eyebrow">Shop</span>
+          <h2 id="shopH">Loc care shelf</h2>
+          <p>Light, residue-free products that won’t build up inside your locs. Pick up at the salon or get it delivered.</p>
+        </div>
+        <div class="chips scroll" id="shopFilters" role="group" aria-label="Filter products"></div>
+      </div>
+      <div class="grid" id="products"><p class="empty">Loading products…</p></div>
+    </div>
+  </section>
+
+  <section class="block alt" id="how" aria-labelledby="howH">
+    <div class="wrap">
+      <div class="sec-head"><div><span class="eyebrow">Booking</span><h2 id="howH">How booking works</h2></div></div>
+      <ol class="steps-grid">
+        <li><h3>Choose your service</h3><p>Pick from the loc menu. Tell us roughly how many locs you have and how long they are, so we set aside enough time.</p></li>
+        <li><h3>Pick a time</h3><p>We have two chairs. Greyed-out times are fully booked, so pick any time that is still open.</p></li>
+        <li><h3>Pay the deposit</h3><p>We confirm by phone, and a <span id="depPctTxt">30%</span> deposit holds your slot. You pay the rest after your session.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="block" id="visit" aria-labelledby="visitH">
+    <div class="wrap visit">
+      <div>
+        <span class="eyebrow">Visit</span>
+        <h2 id="visitH">Come sit with the twins</h2>
+        <dl id="visitInfo"></dl>
+      </div>
+      <div class="panel">
+        <h3>Loc care between visits</h3>
+        <p>Book a retwist every 4-6 weeks and a detox every 3 months. Sleep in a satin bonnet or loc sock, and spritz your locs lightly instead of soaking them.</p>
+        <button class="btn ghost sm" data-action="book" data-id="s4" style="justify-self:start">Book a maintenance retwist</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="block alt" id="contact" aria-labelledby="contactH">
+    <div class="wrap">
+      <div class="sec-head"><div><span class="eyebrow">Support</span><h2 id="contactH">Talk to us</h2>
+        <p>Call or WhatsApp us, or send a message and we will come back to you.</p></div></div>
+      <div class="contact-grid">
+        <div class="panel">
+          <h3>Phone &amp; WhatsApp</h3>
+          <p><a class="tel" href="tel:+254113394402">+254 113 394402</a><br><a class="tel" href="tel:+254741569288">+254 741 569288</a></p>
+          <h3>Email</h3>
+          <p id="emails"></p>
+        </div>
+        <form class="panel" id="contactForm" novalidate>
+          <h3>Send a message</h3>
+          <input class="hp" name="website" id="cWebsite" tabindex="-1" autocomplete="off" aria-hidden="true">
+          <div class="row2">
+            <div class="field"><label for="mName">Your name</label><input id="mName" autocomplete="name" required></div>
+            <div class="field"><label for="mPhone">Phone</label><input id="mPhone" type="tel" inputmode="tel" autocomplete="tel" required></div>
+          </div>
+          <div class="field"><label for="mMsg">Message</label><textarea id="mMsg" required></textarea></div>
+          <p class="err" id="mErr" hidden></p>
+          <button class="btn" type="submit">Send</button>
+        </form>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span id="footName">© Twins Locs Arena</span>
+    <span class="foot-note">We count visits anonymously (no IP addresses) to improve this site.</span>
+    <a class="link-btn" href="/staff">Staff sign in</a>
+  </div>
+</footer>
+
+<nav class="tabbar" aria-label="Quick navigation">
+  <a href="#home" data-nav="home" aria-current="true"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Home</a>
+  <a href="#services" data-nav="services"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h12M9 12h12M9 18h12"/><circle cx="4.5" cy="6" r="1.2"/><circle cx="4.5" cy="12" r="1.2"/><circle cx="4.5" cy="18" r="1.2"/></svg>Menu</a>
+  <button class="tb-book" data-action="book"><span class="disc"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4M12 12.5v5M9.5 15h5"/></svg></span>Book</button>
+  <a href="#shop" data-nav="shop"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3h8v3H8zM7 6h10l1 3v11a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V9z"/><path d="M9 13h6"/></svg>Shop</a>
+  <button data-action="open-cart"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14l-1.2 12.1a1 1 0 0 1-1 .9H7.2a1 1 0 0 1-1-.9z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>Bag<b class="tb-count num" id="bagCount2"></b></button>
+</nav>
+
+<div class="scrim" id="scrim" hidden data-action="close-cart"></div>
+<aside class="drawer" id="cart" hidden aria-label="Your bag">
+  <div class="grab" aria-hidden="true"></div>
+  <div class="drawer-head"><h2>Your bag</h2><button class="x" data-action="close-cart" aria-label="Close bag">×</button></div>
+  <div class="drawer-body" id="cartBody"></div>
+</aside>
+
+<dialog id="bookDlg" aria-label="Book a session">
+  <form class="dlg two" id="bookForm" novalidate>
+    <div class="dlg-main">
+      <div class="grab" aria-hidden="true"></div>
+      <div class="spread"><h2>Book a session</h2><button type="button" class="x" data-action="close-dlg" aria-label="Close">×</button></div>
+      <input class="hp" name="website" id="bWebsite" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <div id="bSignin"></div>
+      <div class="field"><label for="bSvc">Service</label><select id="bSvc" required></select></div>
+      <div class="field"><span class="lbl">Day</span><input type="hidden" id="bDate"><div class="days" id="bDays" role="group" aria-label="Choose a day"></div></div>
+      <div class="field"><span class="lbl">Time</span><div class="slots" id="bSlots" role="group" aria-label="Available times"></div><span class="hint" id="slotHint"></span></div>
+      <div class="field"><label for="bNotes">About your locs</label><textarea id="bNotes" placeholder="e.g. about 90 locs, shoulder-length, last retwist 6 weeks ago"></textarea></div>
+    </div>
+    <div class="dlg-side">
+      <span class="eyebrow">Your details</span>
+      <div class="field"><label for="bName">Name</label><input id="bName" autocomplete="name" required></div>
+      <div class="field"><label for="bPhone">Phone</label><input id="bPhone" type="tel" inputmode="tel" autocomplete="tel" required></div>
+      <div class="sum num" id="bSum"></div>
+      <div class="sheet-foot">
+        <p class="err" id="bErr" hidden></p>
+        <button class="btn block" type="submit">Request booking</button>
+        <p class="hint">We’ll call to confirm and send the deposit details.</p>
+      </div>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="doneDlg" aria-label="Confirmation"><div class="dlg-main done" id="doneBody"></div></dialog>
+<dialog id="acctDlg" aria-label="Your account"><div class="dlg-main acct" id="acctBody"></div></dialog>
+
+<div class="toast" id="toast" hidden role="status"></div>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "HairSalon",
+  "name": "Twins Locs Arena",
+  "description": "Loc salon in Nairobi: starter locs, retwists, interlocking, microlocs, loc repairs, loc styling and loc care products.",
+  "url": "https://www.twinslocsarena.com/",
+  "logo": "https://www.twinslocsarena.com/logo.svg",
+  "image": "https://www.twinslocsarena.com/icons/icon-512.png",
+  "telephone": ["+254113394402", "+254741569288"],
+  "email": "support@twinslocsarena.com",
+  "priceRange": "KSh 800 - KSh 18,000",
+  "currenciesAccepted": "KES",
+  "paymentAccepted": "M-Pesa, Cash",
+  "address": { "@type": "PostalAddress", "addressLocality": "Nairobi", "addressCountry": "KE" },
+  "areaServed": "Nairobi",
+  "openingHoursSpecification": [{
+    "@type": "OpeningHoursSpecification",
+    "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],
+    "opens": "08:00", "closes": "18:00"
+  }],
+  "makesOffer": [
+    { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Starter locs" }, "priceCurrency": "KES", "price": "3500" },
+    { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Retwist & style" }, "priceCurrency": "KES", "price": "1500" },
+    { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Interlocking maintenance" }, "priceCurrency": "KES", "price": "2000" },
+    { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Microlocs installation" }, "priceCurrency": "KES", "price": "18000" }
+  ]
+}
+</script>
+<script src="/app.js" defer></script>
+</body>
+</html>

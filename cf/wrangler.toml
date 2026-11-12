@@ -1,0 +1,47 @@
+name = "twins-locs-arena"
+main = "src/index.js"
+compatibility_date = "2025-09-01"
+compatibility_flags = ["nodejs_compat"]
+workers_dev = true
+
+# Static customer-facing files. Staff pages are NOT here: they live inside the
+# Worker bundle and are only served after sign-in (see src/pages.js).
+[assets]
+directory = "./public"
+binding = "ASSETS"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "twins-locs-arena"
+database_id = "placeholder-set-by-wrangler-d1-create"
+
+# Uploaded product photos, receipts and filing-cabinet documents.
+[[r2_buckets]]
+binding = "FILES"
+bucket_name = "twins-locs-arena-files"
+
+[triggers]
+crons = ["17 2 * * *"]
+
+[vars]
+SITE_NAME = "Twins Locs Arena"
+SUPPORT_PHONE_1 = "+254 113 394402"
+SUPPORT_PHONE_2 = "+254 741 569288"
+SUPPORT_EMAIL = "support@twinslocsarena.com"
+SALES_EMAIL = "sales@twinslocsarena.com"
+BOOKINGS_EMAIL = "bookings@twinslocsarena.com"
+
+# Secrets (set with: wrangler secret put NAME) - never in this file:
+#   SESSION_SECRET      signing key for cookies and tokens
+#   OWNER_EMAIL         first management account created on setup
+#   OWNER_SETUP_CODE    one-time code to claim the owner account
+#   RESEND_API_KEY      email sending
+#   NOTIFY_EMAIL        where booking/order alerts go
+#   CALLMEBOT_PHONE / CALLMEBOT_APIKEY   WhatsApp alerts
+#   GOOGLE_CLIENT_ID    customer Google sign-in (also settable in admin)
+#   ANTHROPIC_API_KEY   turns the AI staff agents on
+
+[[rules]]
+type = "Text"
+globs = ["**/*.html", "**/*.sql", "**/*.md"]
+fallthrough = true

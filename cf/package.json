@@ -1,0 +1,18 @@
+{
+  "name": "twins-locs-arena",
+  "private": true,
+  "type": "module",
+  "description": "Twins Locs Arena: shop, bookings, client portal and staff Operations Hub on Cloudflare",
+  "scripts": {
+    "dev": "wrangler dev",
+    "test": "node --test test/*.test.mjs",
+    "db:init": "wrangler d1 execute twins-locs-arena --local --file=./schema.sql",
+    "db:init:remote": "wrangler d1 execute twins-locs-arena --remote --file=./schema.sql",
+    "db:accounts": "node scripts/make-accounts.mjs && wrangler d1 execute twins-locs-arena --local --file=./seed-accounts.sql",
+    "db:accounts:remote": "node scripts/make-accounts.mjs && wrangler d1 execute twins-locs-arena --remote --file=./seed-accounts.sql",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  }
+}
