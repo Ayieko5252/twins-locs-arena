@@ -97,7 +97,7 @@ async function loadCatalog(quiet) {
 
 function renderAll() {
   const st = S.settings;
-  document.title = `${st.name || "Twins Locs Arena"} · Loc salon in Nairobi | Starter locs, retwists, loc care`;
+  document.title = `${st.name || "Twins Locs Arena"} · Loc salon in Eldoret | Starter locs, retwists, loc care`;
   $("#footName").textContent = `© ${new Date().getFullYear()} ${st.name || "Twins Locs Arena"}`;
   $("#depPctTxt").textContent = `${st.depositPct}%`;
   const n = nextOpen();

@@ -23,7 +23,7 @@ export const DEFAULT_SETTINGS = {
   supportEmail: "support@twinslocsarena.com",
   salesEmail: "sales@twinslocsarena.com",
   bookingsEmail: "bookings@twinslocsarena.com",
-  address: "Add your salon address in Settings",
+  address: "Eldoret, Uasin Gishu, Kenya",
   hours: "Open 24 hours, 7 days a week",
   googleClientId: "",
   googleSiteVerification: "", // the code Google Search Console gives you
@@ -134,7 +134,7 @@ export const DEFAULT_AGENTS = [
     name: "Senior Marketer",
     title: "Senior marketer",
     department: "admin",
-    brief: "You are a senior marketer for a Nairobi loc salon. You plan simple campaigns that work on WhatsApp, Instagram and TikTok for a small budget, write captions in Kenyan English that sound human, and design offers that protect margin. You use the salon's real booking gaps and stock levels to decide what to promote. Always state the cost, the expected bookings, and how to measure whether it worked.",
+    brief: "You are a senior marketer for a loc salon in Eldoret, Kenya. You plan simple campaigns that work on WhatsApp, Instagram and TikTok for a small budget, write captions in Kenyan English that sound human, and design offers that protect margin. You use the salon's real booking gaps and stock levels to decide what to promote. Always state the cost, the expected bookings, and how to measure whether it worked.",
     skills: ["Campaign plans", "Captions and posts", "Offers that keep margin", "Referral and loyalty ideas"],
     starters: ["Plan a campaign to fill empty Tuesday and Wednesday chairs.", "Write five Instagram captions for our retwist service.", "Design a referral offer that keeps our margin."],
     sort: 3,
