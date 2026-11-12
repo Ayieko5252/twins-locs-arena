@@ -55,21 +55,25 @@ on for their own account under **Security**.
 
 ---
 
-## 2. Buy the domain twinslocsarena.com
+## 2. Your addresses
 
-I cannot buy a domain for you, because that means paying with your card. It takes
-about five minutes.
+The salon is live at these addresses, and it stays up day and night:
 
-1. Sign in at **dash.cloudflare.com**.
-2. In the left menu choose **Domain Registration**, then **Register Domain**.
-3. Search for `twinslocsarena.com` and add it to the cart (about KSh 1,600 a year).
-4. Pay. The domain appears in your account straight away.
-5. Tell me it is done, and I will point it at the site and set up `www`.
+| What | Address |
+| --- | --- |
+| The shop and booking page | https://www.twinslocsarena.com |
+| Client portal | https://www.twinslocsarena.com/portal |
+| Staff sign in | https://www.twinslocsarena.com/staff |
+| Operations Hub | https://www.twinslocsarena.com/ops |
 
-If the name is already taken, tell me which name you bought instead and I will
-use that one.
+`twinslocsarena.com` without the `www` sends people to the same place.
 
----
+The domain is registered until 12 November 2027 and renews itself. The contact
+on it is Kevin Aiyeko, ayiekokelvin21@gmail.com, +254 790850917.
+
+**One thing to finish:** Cloudflare emails ayiekokelvin21@gmail.com a link to
+confirm the registrant contact change. Open that email and click the link. If
+nobody clicks it within 15 days, the domain can be suspended.
 
 ## 3. Email addresses on your own domain (Zoho Mail, free)
 
@@ -177,6 +181,8 @@ Open **Settings** in the hub.
   negative margin). The default markup is 60%, which leaves about 27% after VAT.
   The products page shows "Left after VAT" for every item, and flags thin ones.
 - **Deposit %** is 30 of the service price.
+- **Opening hours** are set to all day, every day, so clients can book night
+  visits. Change `open` and `close` in Settings if you want to stop that.
 - **Discount cap %** is 15. Staff cannot create a bigger offer; management can.
 - **Approval over** is KSh 10,000. Any expense at or above it waits for approval.
 

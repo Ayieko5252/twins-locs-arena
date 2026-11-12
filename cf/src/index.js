@@ -21,6 +21,12 @@ export default {
     const url = new URL(request.url);
     const path = url.pathname.replace(/\/+$/, "") || "/";
 
+    // One address for the salon: the bare domain sends people to www.
+    if (url.hostname === "twinslocsarena.com") {
+      url.hostname = "www.twinslocsarena.com";
+      return Response.redirect(url.toString(), 301);
+    }
+
     try {
       if (!env.DB) return new Response("The database isn’t connected yet.", { status: 503 });
 

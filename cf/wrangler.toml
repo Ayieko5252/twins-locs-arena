@@ -25,11 +25,21 @@ database_id = "62a4b1ec-8f49-4c84-b842-0a21cb2d2201"
 binding = "FILES"
 bucket_name = "twins-locs-arena-files"
 
+# The salon's own domain. Cloudflare makes the DNS records and the certificate.
+[[routes]]
+pattern = "twinslocsarena.com"
+custom_domain = true
+
+[[routes]]
+pattern = "www.twinslocsarena.com"
+custom_domain = true
+
 [triggers]
 crons = ["17 2 * * *"]
 
 [vars]
 SITE_NAME = "Twins Locs Arena"
+SITE_ORIGIN = "https://www.twinslocsarena.com"
 SUPPORT_PHONE_1 = "+254 113 394402"
 SUPPORT_PHONE_2 = "+254 741 569288"
 SUPPORT_EMAIL = "support@twinslocsarena.com"
