@@ -6,8 +6,8 @@
   "scope": "/",
   "display": "standalone",
   "orientation": "any",
-  "background_color": "#204028",
-  "theme_color": "#204028",
+  "background_color": "#0C0C0A",
+  "theme_color": "#0C0C0A",
   "lang": "en",
   "categories": ["beauty", "shopping", "lifestyle"],
   "icons": [

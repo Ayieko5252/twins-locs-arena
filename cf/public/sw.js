@@ -1,6 +1,6 @@
 // Network first, so prices and times are always fresh; the cached copy is the
 // fallback when the phone has no signal. Staff pages and live data are never cached.
-const CACHE = "tla-cf-v3";
+const CACHE = "tla-cf-v4";
 const SHELL = ["/", "/index.html", "/brand.css", "/shop.css", "/app.js", "/app.html", "/app-install.js", "/logo.svg", "/favicon.svg", "/manifest.webmanifest", "/icons/icon-192.png", "/icons/icon-512.png"];
 
 self.addEventListener("install", (e) => {

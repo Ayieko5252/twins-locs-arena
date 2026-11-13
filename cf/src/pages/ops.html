@@ -13,22 +13,22 @@
 <link rel="stylesheet" href="/brand.css">
 <style nonce="__NONCE__">
 .hub{display:grid;grid-template-columns:232px 1fr;min-height:100dvh}
-.side{background:var(--green-deep);color:var(--on-green);padding:20px 14px;display:flex;flex-direction:column;gap:18px;position:sticky;top:0;height:100dvh;overflow:auto}
-:root[data-theme="dark"] .side{background:#0E2214}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .side{background:#0E2214}}
+.side{background:var(--brand-deep);color:var(--cream);padding:20px 14px;display:flex;flex-direction:column;gap:18px;position:sticky;top:0;height:100dvh;overflow:auto}
+:root[data-theme="dark"] .side{background:#060605}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .side{background:#060605}}
 .side .brand{font-family:var(--f-display);font-size:1.05rem;display:flex;align-items:center;gap:8px}
 .side .brand small{font-family:var(--f-body);font-size:.62rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}
-.who{background:rgba(248,232,200,.1);border-radius:10px;padding:10px 12px;display:grid;gap:2px}
+.who{background:rgba(217,169,60,.12);border-radius:10px;padding:10px 12px;display:grid;gap:2px}
 .who b{font-size:.95rem}
-.who span{font-size:.76rem;color:#BFD2B4}
+.who span{font-size:.76rem;color:#C9BC98}
 .navlist{display:grid;gap:2px}
-.navlist button{background:none;border:0;color:#CFE0C4;text-align:left;padding:.55em .75em;border-radius:8px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:10px;font-size:.92rem;width:100%}
-.navlist button:hover{background:rgba(248,232,200,.1);color:var(--on-green);transform:translateX(2px)}
-.navlist button[aria-current="page"]{background:var(--cream);color:var(--green-deep)}
-.navlist .n{margin-left:auto;font-size:.72rem;background:var(--gold);color:#23200C;border-radius:999px;padding:0 .5em;font-weight:700}
-.side-foot{margin-top:auto;display:grid;gap:8px;font-size:.78rem;color:#A9BC9D}
-.side-foot .btn{border-color:rgba(248,232,200,.5);color:var(--on-green);background:transparent}
-.side-foot .btn:hover{background:rgba(248,232,200,.12)}
+.navlist button{background:none;border:0;color:#CFC4A6;text-align:left;padding:.55em .75em;border-radius:8px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:10px;font-size:.92rem;width:100%}
+.navlist button:hover{background:rgba(217,169,60,.14);color:var(--gold-bright);transform:translateX(2px)}
+.navlist button[aria-current="page"]{background:var(--gold);color:#120F06}
+.navlist .n{margin-left:auto;font-size:.72rem;background:var(--gold-bright);color:#120F06;border-radius:999px;padding:0 .5em;font-weight:700}
+.side-foot{margin-top:auto;display:grid;gap:8px;font-size:.78rem;color:#9C9179}
+.side-foot .btn{border-color:rgba(217,169,60,.5);color:var(--cream);background:transparent}
+.side-foot .btn:hover{background:rgba(217,169,60,.16)}
 .main{padding:clamp(16px,2.6vw,30px);display:grid;gap:18px;align-content:start;min-width:0}
 .top{display:flex;justify-content:space-between;align-items:end;gap:14px;flex-wrap:wrap}
 .top h1{font-size:clamp(1.6rem,3vw,2.2rem)}
@@ -62,10 +62,10 @@
 @media (max-width:860px){
   .hub{grid-template-columns:1fr}
   .side{display:none}
-  .topbar{display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:30;height:56px;padding:0 12px 0 16px;background:var(--green-deep);color:var(--on-green)}
+  .topbar{display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:30;height:56px;padding:0 12px 0 16px;background:var(--brand-deep);color:var(--cream)}
   .topbar .brand{font-family:var(--f-display);font-size:1rem;margin-right:auto}
-  .topbar select{background:var(--cream);color:var(--green-deep);border:0;border-radius:999px;padding:.4em 2em .4em .9em;font-weight:700;font-size:.86rem;appearance:none}
-  .topbar button{background:none;border:1.5px solid rgba(248,232,200,.35);color:var(--on-green);border-radius:999px;height:34px;padding:0 10px;font-weight:600;font-size:.82rem;cursor:pointer}
+  .topbar select{background:var(--gold);color:#120F06;border:0;border-radius:999px;padding:.4em 2em .4em .9em;font-weight:700;font-size:.86rem;appearance:none}
+  .topbar button{background:none;border:1.5px solid rgba(217,169,60,.4);color:var(--cream);border-radius:999px;height:34px;padding:0 10px;font-weight:600;font-size:.82rem;cursor:pointer}
   .main{padding:14px 12px 30px}
   .t-cards thead{display:none}
   .t-cards tr{display:grid;gap:4px;padding:12px;border-bottom:1px solid var(--line)}
@@ -78,7 +78,7 @@
 <body>
 <div class="hub">
   <aside class="side">
-    <span class="brand"><img src="/logo.webp" alt="" width="30" height="30" style="border-radius:7px"> Twins Locs Arena <small>Hub</small></span>
+    <span class="brand"><img src="/logo.webp" alt="" width="30" height="30" style="border-radius:50%"> Twins Locs Arena <small>Hub</small></span>
     <div class="who" id="who"></div>
     <nav class="navlist" id="nav" aria-label="Sections"></nav>
     <div class="side-foot">

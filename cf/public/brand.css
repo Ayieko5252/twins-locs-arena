@@ -1,21 +1,24 @@
 /* Twins Locs Arena - one stylesheet for the shop, the client portal and the staff hub.
-   The colours are taken from the logo itself: forest green #204028, cream #F8E8C8,
-   gold cuffs #E5A62B and loc brown #502818. */
+   The colours come from the logo: near-black #0C0C0A behind a gold ring, gold
+   lettering #D9A93C lifting to #E9C45A, and the warm browns of the locs. */
 
 :root {
-  --green:#204028; --green-deep:#16301C; --green-soft:#2C5537; --green-line:#3A6845;
-  --cream:#F8E8C8; --cream-light:#FCF2DD; --cream-deep:#EBD8AE;
-  --loc:#884828; --loc-deep:#502818; --gold:#E5A62B; --gold-bright:#F0B340;
+  --brand:#0C0C0A; --brand-deep:#060605; --brand-soft:#1A1A14; --brand-line:#2E2C22;
+  --gold:#D9A93C; --gold-bright:#E9C45A; --gold-deep:#A9791F;
+  --cream:#F2E4C0; --cream-light:#FBF4E2; --cream-deep:#E0CFA4;
+  --loc:#9C5B37; --loc-deep:#5B2E1A;
+  /* kept so older rules still resolve */
+  --green:#0C0C0A; --green-deep:#060605; --green-soft:#1A1A14; --green-line:#2E2C22;
 
-  --bg:#F2E3C0; --bg-2:#EBD8AE; --surface:#F8E8C8; --surface-2:#FCF2DD;
-  --ink:#204028; --ink-2:#3C5C43; --muted:#6A7A62;
-  --line:rgba(32,64,40,.16); --line-strong:rgba(32,64,40,.32);
-  --on-green:#F8E8C8; --gold-soft:rgba(229,166,43,.22);
-  --tag-shadow:rgba(32,64,40,.28);
-  --ok:#2F6B3C; --ok-bg:rgba(47,107,60,.14); --warn:#9A6212; --warn-bg:rgba(217,154,40,.22);
-  --bad:#A2392A; --bad-bg:rgba(162,57,42,.12); --info:#2B5A66; --info-bg:rgba(43,90,102,.13);
-  --shadow:0 18px 40px -24px rgba(32,64,40,.5);
-  --shadow-lift:0 22px 44px -22px rgba(32,64,40,.55);
+  --bg:#F4EDDC; --bg-2:#EBE1C9; --surface:#FBF5E8; --surface-2:#F5EDDB;
+  --ink:#17160F; --ink-2:#3C382A; --muted:#6F6755;
+  --line:rgba(23,22,15,.14); --line-strong:rgba(23,22,15,.3);
+  --on-green:#F2E4C0; --gold-soft:rgba(217,169,60,.22);
+  --tag-shadow:rgba(23,22,15,.3);
+  --ok:#3E7A45; --ok-bg:rgba(62,122,69,.14); --warn:#8A6412; --warn-bg:rgba(217,169,60,.24);
+  --bad:#A43527; --bad-bg:rgba(164,53,39,.12); --info:#4A5C73; --info-bg:rgba(74,92,115,.14);
+  --shadow:0 18px 40px -24px rgba(12,12,10,.55);
+  --shadow-lift:0 22px 44px -22px rgba(12,12,10,.6);
   --f-display:"Young Serif",Georgia,"Times New Roman",serif;
   --f-body:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
   --f-tag:"Nunito","Trebuchet MS",system-ui,sans-serif;
@@ -26,12 +29,12 @@
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg:#204028; --bg-2:#1A3621; --surface:#274D31; --surface-2:#2F5A3A;
-    --ink:#F8E8C8; --ink-2:#E4D4AE; --muted:#AFC2A3;
-    --line:rgba(248,232,200,.14); --line-strong:rgba(248,232,200,.28);
-    --loc:#C07F52; --gold:#E5A62B; --gold-soft:rgba(229,166,43,.22);
+    --bg:#0C0C0A; --bg-2:#121210; --surface:#1A1A14; --surface-2:#23221A;
+    --ink:#F2E4C0; --ink-2:#DCCB9E; --muted:#9C9179;
+    --line:rgba(242,228,192,.13); --line-strong:rgba(242,228,192,.28);
+    --loc:#B9703F; --gold:#D9A93C; --gold-soft:rgba(217,169,60,.2);
     --tag-shadow:rgba(0,0,0,.6);
-    --ok:#8CC98A; --ok-bg:rgba(140,201,138,.16); --warn:#E8B45A; --warn-bg:rgba(232,180,90,.16);
+    --ok:#86C78D; --ok-bg:rgba(134,199,141,.16); --warn:#E8B45A; --warn-bg:rgba(232,180,90,.16);
     --bad:#EC8A76; --bad-bg:rgba(236,138,118,.14); --info:#8FC2CF; --info-bg:rgba(143,194,207,.14);
     --shadow:0 18px 40px -20px rgba(0,0,0,.75);
     --shadow-lift:0 24px 48px -18px rgba(0,0,0,.8);
@@ -39,12 +42,12 @@
   }
 }
 :root[data-theme="dark"] {
-  --bg:#204028; --bg-2:#1A3621; --surface:#274D31; --surface-2:#2F5A3A;
-  --ink:#F8E8C8; --ink-2:#E4D4AE; --muted:#AFC2A3;
-  --line:rgba(248,232,200,.14); --line-strong:rgba(248,232,200,.28);
-  --loc:#C07F52; --gold:#E5A62B; --gold-soft:rgba(229,166,43,.22);
+  --bg:#0C0C0A; --bg-2:#121210; --surface:#1A1A14; --surface-2:#23221A;
+  --ink:#F2E4C0; --ink-2:#DCCB9E; --muted:#9C9179;
+  --line:rgba(242,228,192,.13); --line-strong:rgba(242,228,192,.28);
+  --loc:#B9703F; --gold:#D9A93C; --gold-soft:rgba(217,169,60,.2);
   --tag-shadow:rgba(0,0,0,.6);
-  --ok:#8CC98A; --ok-bg:rgba(140,201,138,.16); --warn:#E8B45A; --warn-bg:rgba(232,180,90,.16);
+  --ok:#86C78D; --ok-bg:rgba(134,199,141,.16); --warn:#E8B45A; --warn-bg:rgba(232,180,90,.16);
   --bad:#EC8A76; --bad-bg:rgba(236,138,118,.14); --info:#8FC2CF; --info-bg:rgba(143,194,207,.14);
   --shadow:0 18px 40px -20px rgba(0,0,0,.75);
   --shadow-lift:0 24px 48px -18px rgba(0,0,0,.8);
@@ -77,16 +80,16 @@ button,input,select,textarea{font:inherit;color:inherit}
 .stack{display:grid;gap:14px}
 
 /* a heading gets a small gold rule, the way the logo uses gold cuffs */
-.sec-head h2::after,.panel h3.ruled::after{content:"";display:block;width:46px;height:3px;border-radius:3px;background:var(--gold);margin-top:10px}
+.sec-head h2::after,.panel h3.ruled::after{content:"";display:block;width:52px;height:3px;border-radius:3px;background:linear-gradient(90deg,var(--gold-bright),var(--gold-deep));margin-top:10px}
 
 /* buttons */
 .btn{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:.5em;border:1.5px solid var(--green);background:var(--green);color:var(--on-green);padding:.7em 1.25em;border-radius:999px;font-weight:600;cursor:pointer;text-decoration:none;white-space:nowrap;
   transition:transform .18s var(--ease), box-shadow .18s var(--ease), background .18s var(--ease), color .18s var(--ease)}
-.btn:hover{transform:translateY(-2px);box-shadow:0 10px 22px -12px rgba(32,64,40,.75)}
+.btn:hover{transform:translateY(-2px);box-shadow:0 10px 22px -12px rgba(12,12,10,.8)}
 .btn:active{transform:translateY(0) scale(.985)}
 .btn.ghost{background:transparent;color:var(--ink);border-color:var(--line-strong)}
 .btn.ghost:hover{border-color:var(--green);background:var(--gold-soft)}
-.btn.gold{background:var(--gold);border-color:var(--gold);color:#23200C}
+.btn.gold{background:var(--gold);border-color:var(--gold);color:#120F06}
 .btn.gold:hover{background:var(--gold-bright);border-color:var(--gold-bright)}
 .btn.danger{background:var(--bad);border-color:var(--bad);color:#fff}
 .btn.sm{padding:.42em .9em;font-size:.88rem}
@@ -171,7 +174,7 @@ td.num,td.mono{white-space:nowrap}
 
 /* dialogs & toast */
 dialog{border:0;border-radius:20px;padding:0;background:var(--surface);color:var(--ink);width:min(680px,calc(100% - 24px));max-height:calc(100% - 32px);box-shadow:var(--shadow-lift)}
-dialog::backdrop{background:rgba(22,48,28,.58);backdrop-filter:blur(2px)}
+dialog::backdrop{background:rgba(6,6,5,.62);backdrop-filter:blur(2px)}
 dialog[open]{animation:dlg-in .22s var(--ease)}
 @keyframes dlg-in{from{opacity:0;transform:translateY(10px) scale(.985)}to{opacity:1;transform:none}}
 .dlg-main{padding:22px;display:grid;gap:14px;align-content:start;overflow:auto}
@@ -195,14 +198,14 @@ dialog[open]{animation:dlg-in .22s var(--ease)}
 
 /* sign-in pages */
 .auth{min-height:100dvh;display:grid;place-items:center;padding:20px;background:
-  radial-gradient(1100px 560px at 50% -12%, rgba(32,64,40,.2), transparent 62%), var(--bg)}
+  radial-gradient(1100px 560px at 50% -12%, rgba(217,169,60,.18), transparent 62%), var(--bg)}
 .auth-card{width:100%;max-width:440px;background:var(--surface);border-radius:20px;padding:26px 24px;display:grid;gap:14px;box-shadow:var(--shadow);border:1px solid var(--line)}
 .auth-card h1{font-size:1.9rem}
 .auth-brand{display:flex;align-items:center;gap:12px;justify-content:center}
 .auth-brand img{border-radius:14px}
 .steps{display:grid;gap:8px;counter-reset:s;padding:0;margin:0;list-style:none}
 .steps li{counter-increment:s;display:grid;grid-template-columns:auto 1fr;gap:10px;font-size:.92rem;color:var(--ink-2)}
-.steps li::before{content:counter(s);background:var(--gold);color:#23200C;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:.75rem;font-weight:700}
+.steps li::before{content:counter(s);background:var(--gold);color:#120F06;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:.75rem;font-weight:700}
 .secret{font-family:var(--f-mono);font-size:1.05rem;letter-spacing:.08em;background:var(--surface-2);border:1.5px dashed var(--line-strong);border-radius:10px;padding:.6em .8em;word-break:break-all;user-select:all}
 
 /* gentle entrance, from a visible resting state */
