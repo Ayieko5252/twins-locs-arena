@@ -5,28 +5,30 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
 <title>Operations Hub · Twins Locs Arena</title>
-<link rel="icon" href="/icons/icon-192.png">
+<link rel="icon" href="/logo.webp" type="image/webp">
+<link rel="apple-touch-icon" href="/icons/icon-180.jpg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Figtree:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap">
 <link rel="stylesheet" href="/brand.css">
 <style nonce="__NONCE__">
 .hub{display:grid;grid-template-columns:232px 1fr;min-height:100dvh}
-.side{background:#2E170D;color:#F1DAB0;padding:20px 14px;display:flex;flex-direction:column;gap:18px;position:sticky;top:0;height:100dvh;overflow:auto}
-:root[data-theme="dark"] .side{background:#120A06}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .side{background:#120A06}}
+.side{background:var(--green-deep);color:var(--on-green);padding:20px 14px;display:flex;flex-direction:column;gap:18px;position:sticky;top:0;height:100dvh;overflow:auto}
+:root[data-theme="dark"] .side{background:#0E2214}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .side{background:#0E2214}}
 .side .brand{font-family:var(--f-display);font-size:1.05rem;display:flex;align-items:center;gap:8px}
-.side .brand small{font-family:var(--f-body);font-size:.62rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#E5B03A}
-.who{background:rgba(241,218,176,.08);border-radius:10px;padding:10px 12px;display:grid;gap:2px}
+.side .brand small{font-family:var(--f-body);font-size:.62rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}
+.who{background:rgba(248,232,200,.1);border-radius:10px;padding:10px 12px;display:grid;gap:2px}
 .who b{font-size:.95rem}
-.who span{font-size:.76rem;color:#C9A57C}
+.who span{font-size:.76rem;color:#BFD2B4}
 .navlist{display:grid;gap:2px}
-.navlist button{background:none;border:0;color:#D9BA8C;text-align:left;padding:.55em .75em;border-radius:8px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:10px;font-size:.92rem;width:100%}
-.navlist button:hover{background:rgba(241,218,176,.08);color:#F1DAB0}
-.navlist button[aria-current="page"]{background:#F1DAB0;color:#2E170D}
-.navlist .n{margin-left:auto;font-size:.72rem;background:#E5B03A;color:#2E170D;border-radius:999px;padding:0 .5em;font-weight:700}
-.side-foot{margin-top:auto;display:grid;gap:8px;font-size:.78rem;color:#AC8967}
-.side-foot .btn{border-color:#F1DAB0;color:#F1DAB0;background:transparent}
+.navlist button{background:none;border:0;color:#CFE0C4;text-align:left;padding:.55em .75em;border-radius:8px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:10px;font-size:.92rem;width:100%}
+.navlist button:hover{background:rgba(248,232,200,.1);color:var(--on-green);transform:translateX(2px)}
+.navlist button[aria-current="page"]{background:var(--cream);color:var(--green-deep)}
+.navlist .n{margin-left:auto;font-size:.72rem;background:var(--gold);color:#23200C;border-radius:999px;padding:0 .5em;font-weight:700}
+.side-foot{margin-top:auto;display:grid;gap:8px;font-size:.78rem;color:#A9BC9D}
+.side-foot .btn{border-color:rgba(248,232,200,.5);color:var(--on-green);background:transparent}
+.side-foot .btn:hover{background:rgba(248,232,200,.12)}
 .main{padding:clamp(16px,2.6vw,30px);display:grid;gap:18px;align-content:start;min-width:0}
 .top{display:flex;justify-content:space-between;align-items:end;gap:14px;flex-wrap:wrap}
 .top h1{font-size:clamp(1.6rem,3vw,2.2rem)}
@@ -34,11 +36,15 @@
 .dept-dot{width:10px;height:10px;border-radius:50%;display:inline-block}
 .secret-box{background:var(--gold-soft);border-radius:10px;padding:12px 14px;display:grid;gap:6px}
 .photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px}
-.photo{margin:0;background:var(--surface);border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
+.photo{margin:0;background:var(--surface);border-radius:16px;overflow:hidden;display:flex;flex-direction:column;border:1px solid var(--line);
+  transition:transform .2s var(--ease), box-shadow .2s var(--ease)}
+.photo:hover{transform:translateY(-3px);box-shadow:var(--shadow-lift)}
 .photo img{width:100%;aspect-ratio:4/5;object-fit:cover;background:var(--surface-2)}
 .photo figcaption{padding:12px 14px 14px;display:grid;gap:6px}
 .agent-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
-.agent{background:var(--surface);border-radius:14px;padding:16px;display:grid;gap:8px;align-content:start;cursor:pointer;border:1.5px solid transparent;text-align:left;color:inherit;font:inherit}
+.agent{background:var(--surface);border-radius:16px;padding:16px;display:grid;gap:8px;align-content:start;cursor:pointer;border:1.5px solid var(--line);text-align:left;color:inherit;font:inherit;
+  transition:transform .2s var(--ease), box-shadow .2s var(--ease), border-color .2s var(--ease)}
+.agent:hover{border-color:var(--gold);transform:translateY(-3px);box-shadow:var(--shadow-lift)}
 .agent:hover{border-color:var(--gold)}
 .agent h3{font-size:1.1rem}
 .agent .skills{display:flex;flex-wrap:wrap;gap:6px}
@@ -56,10 +62,10 @@
 @media (max-width:860px){
   .hub{grid-template-columns:1fr}
   .side{display:none}
-  .topbar{display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:30;height:56px;padding:0 12px 0 16px;background:#2E170D;color:#F1DAB0}
+  .topbar{display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:30;height:56px;padding:0 12px 0 16px;background:var(--green-deep);color:var(--on-green)}
   .topbar .brand{font-family:var(--f-display);font-size:1rem;margin-right:auto}
-  .topbar select{background:#F1DAB0;color:#2E170D;border:0;border-radius:999px;padding:.4em 2em .4em .9em;font-weight:700;font-size:.86rem;appearance:none}
-  .topbar button{background:none;border:1.5px solid rgba(241,218,176,.35);color:#F1DAB0;border-radius:999px;height:34px;padding:0 10px;font-weight:600;font-size:.82rem;cursor:pointer}
+  .topbar select{background:var(--cream);color:var(--green-deep);border:0;border-radius:999px;padding:.4em 2em .4em .9em;font-weight:700;font-size:.86rem;appearance:none}
+  .topbar button{background:none;border:1.5px solid rgba(248,232,200,.35);color:var(--on-green);border-radius:999px;height:34px;padding:0 10px;font-weight:600;font-size:.82rem;cursor:pointer}
   .main{padding:14px 12px 30px}
   .t-cards thead{display:none}
   .t-cards tr{display:grid;gap:4px;padding:12px;border-bottom:1px solid var(--line)}
@@ -72,7 +78,7 @@
 <body>
 <div class="hub">
   <aside class="side">
-    <span class="brand">Twins Locs Arena <small>Hub</small></span>
+    <span class="brand"><img src="/logo.webp" alt="" width="30" height="30" style="border-radius:7px"> Twins Locs Arena <small>Hub</small></span>
     <div class="who" id="who"></div>
     <nav class="navlist" id="nav" aria-label="Sections"></nav>
     <div class="side-foot">

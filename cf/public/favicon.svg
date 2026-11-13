@@ -2,11 +2,11 @@
   <title>Twins Locs Arena</title>
   <defs>
     <style>
-      .head{fill:#2E170D}
-      .loc{fill:#7A4424}
-      .bead{fill:#D39A17}
-      .word{font-family:"Young Serif",Georgia,"Times New Roman",serif;fill:#2E170D}
-      .tag{font-family:"Nunito","Trebuchet MS",sans-serif;font-style:italic;font-weight:900;fill:#2E170D}
+      .head{fill:#F8E8C8}
+      .loc{fill:#C07F52}
+      .bead{fill:#E5A62B}
+      .word{font-family:"Young Serif",Georgia,"Times New Roman",serif;fill:#F8E8C8}
+      .tag{font-family:"Nunito","Trebuchet MS",sans-serif;font-style:italic;font-weight:900;fill:#F8E8C8}
     </style>
 
     <!-- one hanging loc with a gold cuff -->
@@ -44,7 +44,7 @@
       </g>
     </g>
   </defs>
-  <rect width="512" height="512" rx="96" fill="#E9CB98"/>
+  <rect width="512" height="512" rx="96" fill="#204028"/>
   <g transform="translate(26,96) scale(0.62)"><use href="#head"/></g>
   <g transform="translate(486,96) scale(-0.62,0.62)"><use href="#head"/></g>
 </svg>

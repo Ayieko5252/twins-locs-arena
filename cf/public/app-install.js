@@ -45,5 +45,19 @@ if (isIOS || isAndroid) {
   }
 }
 
-if ("serviceWorker" in navigator && location.protocol === "https:") navigator.serviceWorker.register("/sw.js").catch(() => {});
+// An installed app must pick up new colours and prices by itself: when a new
+// version of the worker takes over, reload the page once.
+if ("serviceWorker" in navigator && location.protocol === "https:") {
+  let reloading = false;
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (reloading) return;
+    reloading = true;
+    location.reload();
+  });
+  navigator.serviceWorker.register("/sw.js").then((reg) => {
+    reg.update();
+    setInterval(() => reg.update(), 60 * 60 * 1000);
+    document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") reg.update(); });
+  }).catch(() => {});
+}
 })();

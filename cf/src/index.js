@@ -22,7 +22,7 @@ export default {
     const path = url.pathname.replace(/\/+$/, "") || "/";
 
     // One address for the salon: the bare domain sends people to www.
-    if (url.hostname === "twinslocsarena.com") {
+    if (url.hostname === "twinslocsarena.com" && url.protocol === "https:") {
       url.hostname = "www.twinslocsarena.com";
       return Response.redirect(url.toString(), 301);
     }

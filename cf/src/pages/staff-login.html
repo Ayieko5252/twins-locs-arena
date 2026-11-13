@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
 <title>Staff sign in · Twins Locs Arena</title>
-<link rel="icon" href="/icons/icon-192.png">
+<link rel="icon" href="/logo.webp" type="image/webp">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Figtree:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap">
@@ -15,12 +15,11 @@
 <main class="auth">
   <div class="auth-card">
     <div class="auth-brand">
-      <span id="strandL"></span>
-      <div style="text-align:center">
+      <img src="/logo.webp" alt="Twins Locs Arena" width="104" height="104">
+      <div>
         <span class="eyebrow">Twins Locs Arena</span>
         <h1 id="title">Staff sign in</h1>
       </div>
-      <span id="strandR"></span>
     </div>
 
     <p class="hint" id="lead">Use the email address management set up for you.</p>
@@ -85,20 +84,7 @@ const showError = (msg) => { const e = $("#err"); e.textContent = msg; e.hidden 
 let toastT;
 const toast = (msg) => { const t = $("#toast"); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => (t.hidden = true), 4000); };
 
-// the two beaded strands from the logo
-function strand(len, beads) {
-  const seg = 16, n = Math.floor(len / seg);
-  let s = "";
-  for (let i = 0; i < n; i++) {
-    const cy = i * seg + seg / 2 + 1, cx = 10 + (i % 2 ? 1.4 : -1.4);
-    s += `<ellipse class="st-seg" cx="${cx}" cy="${cy}" rx="6.6" ry="9.6"/>`;
-    if (beads.includes(i)) s += `<rect class="st-bead" x="2.5" y="${cy - 4.5}" width="15" height="9" rx="2.5"/>`;
-  }
-  return `<svg viewBox="0 0 20 ${n * seg + 4}" height="${n * seg + 4}" aria-hidden="true">${s}</svg>`;
-}
-$("#strandL").innerHTML = strand(70, [2]);
-$("#strandR").innerHTML = strand(70, [3]);
-$("#strandR").style.transform = "scaleX(-1)";
+
 
 async function init() {
   try {

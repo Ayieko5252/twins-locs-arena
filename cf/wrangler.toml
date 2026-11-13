@@ -3,6 +3,7 @@ main = "src/index.js"
 compatibility_date = "2025-09-01"
 compatibility_flags = ["nodejs_compat"]
 workers_dev = true
+preview_urls = false
 
 # Static customer-facing files. Staff pages are NOT here: they live inside the
 # Worker bundle and are only served after sign-in (see src/pages.js).
