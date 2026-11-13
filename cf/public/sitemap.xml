@@ -21,6 +21,11 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://www.twinslocsarena.com/privacy</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
     <loc>https://www.twinslocsarena.com/#work</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>

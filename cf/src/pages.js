@@ -35,9 +35,9 @@ export async function servePage(path, request, env) {
 
   // The client portal and password reset are ordinary customer pages; the data
   // behind them still needs a signed-in session, which the API checks.
-  if (path === "/portal" || path === "/reset" || path === "/app") {
+  if (path === "/portal" || path === "/reset" || path === "/app" || path === "/privacy") {
     const settings = await getSettings(env.DB).catch(() => ({}));
-    const file = path === "/portal" ? "/portal.html" : path === "/app" ? "/app.html" : "/reset.html";
+    const file = path === "/portal" ? "/portal.html" : path === "/app" ? "/app.html" : path === "/privacy" ? "/privacy.html" : "/reset.html";
     const asset = await env.ASSETS.fetch(new Request(new URL(file, request.url), request));
     if (asset.status === 404) return null;
     const res = new Response(asset.body, asset);

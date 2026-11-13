@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.twinslocsarena.app",
+      "sha256_cert_fingerprints": [
+        "FC:7A:8D:01:EB:95:22:1D:3A:6D:F2:D2:70:F1:E6:30:3E:30:AE:54:0A:76:60:FF:D8:2B:10:F3:E3:5A:7C:9C"
+      ]
+    }
+  }
+]

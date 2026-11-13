@@ -1,56 +1,83 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 560" role="img" aria-label="Twins Locs Arena">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" role="img" aria-label="Twins Locs Arena: enjoy the beauty in locs">
   <title>Twins Locs Arena</title>
   <defs>
-    <style>
-      .head{fill:#F8E8C8}
-      .loc{fill:#C07F52}
-      .bead{fill:#E5A62B}
-      .word{font-family:"Young Serif",Georgia,"Times New Roman",serif;fill:#F8E8C8}
-      .tag{font-family:"Nunito","Trebuchet MS",sans-serif;font-style:italic;font-weight:900;fill:#F8E8C8}
-    </style>
+    <radialGradient id="disc2" cx="50%" cy="36%" r="74%">
+      <stop offset="0%" stop-color="#2E2E22"/>
+      <stop offset="60%" stop-color="#151510"/>
+      <stop offset="100%" stop-color="#070706"/>
+    </radialGradient>
+    <linearGradient id="ring2" x1="10%" y1="0%" x2="90%" y2="100%">
+      <stop offset="0%" stop-color="#F3D27A"/>
+      <stop offset="26%" stop-color="#D9A93C"/>
+      <stop offset="52%" stop-color="#9C6F1C"/>
+      <stop offset="76%" stop-color="#E9C45A"/>
+      <stop offset="100%" stop-color="#C08F26"/>
+    </linearGradient>
+    <linearGradient id="gold2" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#F6DC95"/>
+      <stop offset="45%" stop-color="#D9A93C"/>
+      <stop offset="100%" stop-color="#A5760F"/>
+    </linearGradient>
+    <linearGradient id="hair2" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#8A4D2C"/>
+      <stop offset="100%" stop-color="#4E2714"/>
+    </linearGradient>
+    <linearGradient id="skin2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#A4643E"/>
+      <stop offset="100%" stop-color="#7A4327"/>
+    </linearGradient>
 
-    <!-- one hanging loc with a gold cuff -->
-    <g id="loc">
-      <rect x="-9" y="0" width="18" height="118" rx="9" class="loc"/>
-      <rect x="-11" y="84" width="22" height="12" rx="4" class="bead"/>
-    </g>
-
-    <!-- a profile silhouette, facing right -->
-    <g id="head">
-      <!-- the head, with the back edge scalloped into locs -->
-      <path class="head" d="M104 28
-        c46 0 80 34 84 80
-        c2 22-1 36 7 50
-        c6 11 17 22 17 31
-        c0 9-11 12-18 13
-        c-6 1-7 3-7 10
-        c0 12 2 21-6 28
-        c-8 7-21 8-35 6
-        l-3 36
-        c-2 20-18 34-40 34
-        c-16 0-30-4-42-12
-        c-10-7-16-16-16-26
-        c0-14 6-24 6-40
-        V84
-        c0-30 20-56 53-56 Z"/>
-      <!-- the loc mass behind, its outer edge made of loc bumps -->
-      <path class="head" d="M86 44c-30 8-52 34-54 68 a26 26 0 0 0 0 26 a26 26 0 0 0 0 26 a26 26 0 0 0 0 26 a26 26 0 0 0 0 26 a26 26 0 0 0 0 26 a26 26 0 0 0 0 26 a26 26 0 0 0 0 26 a26 26 0 0 0 0 26 a26 26 0 0 0 0 26 c0 18-4 30-4 30h66V44Z"/>
-      <!-- two locs falling past the jaw, each finished with a gold cuff -->
-      <g class="loc">
-        <rect x="74" y="196" width="17" height="104" rx="8.5"/>
-        <rect x="72" y="268" width="21" height="12" rx="4" class="bead"/>
-        <rect x="104" y="214" width="17" height="86" rx="8.5"/>
-        <rect x="102" y="276" width="21" height="12" rx="4" class="bead"/>
+    <g id="face2">
+      <path fill="url(#hair2)" d="M92 34c-30 10-52 36-54 72
+        a22 22 0 0 0 0 26 a22 22 0 0 0 0 26 a22 22 0 0 0 0 26 a22 22 0 0 0 0 26
+        a22 22 0 0 0 0 26 c0 16-4 26-4 26h72V34Z"/>
+      <path fill="url(#skin2)" d="M104 24
+        c42 0 72 30 76 72 2 20-1 32 6 45 5 10 15 19 15 27 0 8-9 11-16 12-5 1-6 3-6 9
+        0 11 2 19-6 25-7 6-19 7-31 5l-3 32c-2 18-16 30-36 30-14 0-27-4-38-11
+        -9-6-14-14-14-23 0-13 5-22 5-36V76c0-29 19-52 48-52Z"/>
+      <path fill="#2A1A10" opacity=".85" d="M128 104c12-8 28-7 38-1l-4 7c-9-5-21-5-30 0z"/>
+      <path fill="#F6ECD8" d="M133 120c9-6 21-6 28 1-8 7-21 7-28-1z"/>
+      <path fill="#2A1A10" d="M142 120a5 5 0 1 1 10 0 5 5 0 0 1-10 0z"/>
+      <path fill="#5B3320" opacity=".7" d="M168 160c6 2 11 3 16 2-4 5-11 6-16 3z"/>
+      <g fill="url(#hair2)">
+        <rect x="66" y="180" width="16" height="92" rx="8"/>
+        <rect x="96" y="196" width="16" height="80" rx="8"/>
+      </g>
+      <g fill="#D9A93C">
+        <rect x="64" y="246" width="20" height="11" rx="3.5"/>
+        <rect x="94" y="252" width="20" height="11" rx="3.5"/>
       </g>
     </g>
   </defs>
 
-  <!-- the twins, facing each other across the name -->
-  <g transform="translate(60,96) scale(0.84)"><use href="#head"/></g>
-  <g transform="translate(940,96) scale(-0.84,0.84)"><use href="#head"/></g>
+  <circle cx="320" cy="320" r="320" fill="url(#disc2)"/>
+  <circle cx="320" cy="320" r="300" fill="none" stroke="url(#ring2)" stroke-width="8"/>
+  <circle cx="320" cy="320" r="286" fill="none" stroke="#D9A93C" stroke-width="1.6" opacity=".45"/>
 
-  <text class="word" x="500" y="186" text-anchor="middle" font-size="92">Twins</text>
-  <text class="word" x="500" y="282" text-anchor="middle" font-size="92">Locs</text>
-  <text class="word" x="500" y="378" text-anchor="middle" font-size="92">Arena</text>
-  <text class="tag" x="500" y="470" text-anchor="middle" font-size="44">Enjoy the beauty in locs</text>
+  <g transform="translate(26,176) scale(0.72)"><use href="#face2"/></g>
+  <g transform="translate(614,176) scale(-0.72,0.72)"><use href="#face2"/></g>
+
+  <g font-family="Young Serif, Georgia, 'Times New Roman', serif" fill="url(#gold2)" text-anchor="middle">
+    <text x="320" y="268" font-size="66">Twins</text>
+    <text x="320" y="334" font-size="66">Locs</text>
+    <text x="320" y="400" font-size="66">Arena</text>
+  </g>
+
+  <text x="320" y="468" text-anchor="middle" font-size="38" font-style="italic" font-weight="900"
+        font-family="Nunito, 'Trebuchet MS', sans-serif" fill="url(#gold2)">Enjoy the beauty in</text>
+  <g>
+    <path fill="#B88A22" d="M150 498l34 8-6 34-34-10z"/>
+    <path fill="#B88A22" d="M490 498l-34 8 6 34 34-10z"/>
+    <rect x="178" y="490" width="284" height="34" rx="6" fill="url(#gold2)"/>
+    <text x="320" y="514" text-anchor="middle" font-size="22" font-family="Young Serif, Georgia, serif" fill="#1A1408">locs</text>
+  </g>
+
+  <g fill="#E9C45A" opacity=".85">
+    <path d="M320 128l6 15 15 6-15 6-6 15-6-15-15-6 15-6z"/>
+    <path d="M168 452l4 10 10 4-10 4-4 10-4-10-10-4 10-4z" opacity=".7"/>
+    <path d="M470 448l3.5 9 9 3.5-9 3.5-3.5 9-3.5-9-9-3.5 9-3.5z" opacity=".6"/>
+    <circle cx="214" cy="556" r="3.5"/>
+    <circle cx="420" cy="562" r="3" opacity=".8"/>
+    <circle cx="320" cy="574" r="2.5" opacity=".6"/>
+  </g>
 </svg>

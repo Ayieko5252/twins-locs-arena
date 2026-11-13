@@ -213,3 +213,16 @@ dialog[open]{animation:dlg-in .22s var(--ease)}
 .rise{animation:rise .4s var(--ease) both}
 
 @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
+
+/* the eye on a password box */
+.pw-wrap{position:relative;display:block;min-width:0}
+.pw-wrap input.has-eye{padding-right:2.9em}
+.pw-eye{position:absolute;top:50%;right:6px;transform:translateY(-50%);
+  width:34px;height:34px;display:grid;place-items:center;padding:0;
+  background:transparent;border:0;border-radius:9px;cursor:pointer;
+  color:var(--ink-2);opacity:.75;transition:color .18s var(--ease),opacity .18s var(--ease),background .18s var(--ease)}
+.pw-eye svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.7;
+  stroke-linecap:round;stroke-linejoin:round}
+.pw-eye:hover{color:var(--gold);opacity:1;background:var(--gold-soft)}
+.pw-eye:focus-visible{outline:2px solid var(--gold);outline-offset:1px;color:var(--gold);opacity:1}
+.pw-eye.open{color:var(--gold-bright);opacity:1}

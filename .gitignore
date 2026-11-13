@@ -12,3 +12,14 @@ cf/node_modules/
 # Generated: holds hashed staff passwords, so it never goes into the repository.
 # Re-create it any time with: npm run db:accounts
 cf/seed-accounts.sql
+android/keystore-password.txt
+android/*.keystore
+android/.gradle/
+android/build/
+android/app/build/
+android/app-release-*.apk
+android/app-release-*.aab
+android/play-assets/*.apk
+android/play-assets/*.aab
+android/*.idsig
+android/app-release-unsigned-aligned.apk

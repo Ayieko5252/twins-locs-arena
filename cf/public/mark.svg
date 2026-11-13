@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Twins Locs Arena">
+  <title>Twins Locs Arena</title>
+  <defs>
+    <radialGradient id="disc" cx="50%" cy="38%" r="72%">
+      <stop offset="0%" stop-color="#2A2A20"/>
+      <stop offset="62%" stop-color="#141410"/>
+      <stop offset="100%" stop-color="#070706"/>
+    </radialGradient>
+    <linearGradient id="ring" x1="12%" y1="0%" x2="88%" y2="100%">
+      <stop offset="0%" stop-color="#F3D27A"/>
+      <stop offset="28%" stop-color="#D9A93C"/>
+      <stop offset="55%" stop-color="#9C6F1C"/>
+      <stop offset="78%" stop-color="#E9C45A"/>
+      <stop offset="100%" stop-color="#C08F26"/>
+    </linearGradient>
+    <linearGradient id="hair" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#8A4D2C"/>
+      <stop offset="100%" stop-color="#4E2714"/>
+    </linearGradient>
+    <linearGradient id="skin" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#A4643E"/>
+      <stop offset="100%" stop-color="#7A4327"/>
+    </linearGradient>
+
+    <!-- one head in profile, facing right -->
+    <g id="face">
+      <!-- the loc mass, with a scalloped edge so it reads as locs -->
+      <path fill="url(#hair)" d="M92 34c-30 10-52 36-54 72
+        a22 22 0 0 0 0 26 a22 22 0 0 0 0 26 a22 22 0 0 0 0 26 a22 22 0 0 0 0 26
+        a22 22 0 0 0 0 26 c0 16-4 26-4 26h72V34Z"/>
+      <!-- the face -->
+      <path fill="url(#skin)" d="M104 24
+        c42 0 72 30 76 72 2 20-1 32 6 45 5 10 15 19 15 27 0 8-9 11-16 12-5 1-6 3-6 9
+        0 11 2 19-6 25-7 6-19 7-31 5l-3 32c-2 18-16 30-36 30-14 0-27-4-38-11
+        -9-6-14-14-14-23 0-13 5-22 5-36V76c0-29 19-52 48-52Z"/>
+      <!-- brow, eye, lips -->
+      <path fill="#2A1A10" opacity=".85" d="M128 104c12-8 28-7 38-1l-4 7c-9-5-21-5-30 0z"/>
+      <path fill="#F6ECD8" d="M133 120c9-6 21-6 28 1-8 7-21 7-28-1z"/>
+      <path fill="#2A1A10" d="M142 120a5 5 0 1 1 10 0 5 5 0 0 1-10 0z"/>
+      <path fill="#5B3320" opacity=".7" d="M168 160c6 2 11 3 16 2-4 5-11 6-16 3z"/>
+      <!-- two locs past the jaw, each finished with a gold cuff -->
+      <g fill="url(#hair)">
+        <rect x="66" y="180" width="16" height="92" rx="8"/>
+        <rect x="96" y="196" width="16" height="80" rx="8"/>
+      </g>
+      <g fill="#D9A93C">
+        <rect x="64" y="246" width="20" height="11" rx="3.5"/>
+        <rect x="94" y="252" width="20" height="11" rx="3.5"/>
+      </g>
+    </g>
+  </defs>
+
+  <circle cx="256" cy="256" r="256" fill="url(#disc)"/>
+  <circle cx="256" cy="256" r="238" fill="none" stroke="url(#ring)" stroke-width="7"/>
+  <circle cx="256" cy="256" r="226" fill="none" stroke="#D9A93C" stroke-width="1.5" opacity=".45"/>
+
+  <g transform="translate(14,96) scale(0.82)"><use href="#face"/></g>
+  <g transform="translate(498,96) scale(-0.82,0.82)"><use href="#face"/></g>
+
+  <!-- a few gold sparks, as in the artwork -->
+  <g fill="#E9C45A" opacity=".85">
+    <path d="M256 92l5 13 13 5-13 5-5 13-5-13-13-5 13-5z"/>
+    <path d="M150 400l3.5 9 9 3.5-9 3.5-3.5 9-3.5-9-9-3.5 9-3.5z" opacity=".7"/>
+    <path d="M362 398l3 8 8 3-8 3-3 8-3-8-8-3 8-3z" opacity=".6"/>
+    <circle cx="196" cy="430" r="3"/>
+    <circle cx="318" cy="438" r="2.5" opacity=".8"/>
+    <circle cx="256" cy="452" r="2" opacity=".6"/>
+  </g>
+</svg>

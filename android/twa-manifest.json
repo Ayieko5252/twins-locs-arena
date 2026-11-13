@@ -1,0 +1,64 @@
+{
+  "packageId": "com.twinslocsarena.app",
+  "host": "www.twinslocsarena.com",
+  "name": "Twins Locs Arena",
+  "launcherName": "Twins Locs",
+  "display": "standalone",
+  "themeColor": "#0C0C0A",
+  "themeColorDark": "#0C0C0A",
+  "navigationColor": "#0C0C0A",
+  "navigationColorDark": "#0C0C0A",
+  "navigationDividerColor": "#0C0C0A",
+  "navigationDividerColorDark": "#0C0C0A",
+  "backgroundColor": "#0C0C0A",
+  "enableNotifications": false,
+  "startUrl": "/",
+  "iconUrl": "https://www.twinslocsarena.com/icons/icon-512.png",
+  "maskableIconUrl": "https://www.twinslocsarena.com/icons/icon-maskable-512.png",
+  "splashScreenFadeOutDuration": 300,
+  "signingKey": {
+    "path": "./twinslocsarena.keystore",
+    "alias": "twinslocs"
+  },
+  "appVersionName": "1.0.0",
+  "appVersionCode": 1,
+  "shortcuts": [
+    {
+      "name": "Book a session",
+      "url": "/#book",
+      "chosenIconUrl": "https://www.twinslocsarena.com/icons/icon-192.png",
+      "shortName": "Book"
+    },
+    {
+      "name": "Shop loc care",
+      "url": "/#shop",
+      "chosenIconUrl": "https://www.twinslocsarena.com/icons/icon-192.png",
+      "shortName": "Shop"
+    },
+    {
+      "name": "My account",
+      "url": "/portal",
+      "chosenIconUrl": "https://www.twinslocsarena.com/icons/icon-192.png",
+      "shortName": "Account"
+    }
+  ],
+  "generatorApp": "bubblewrap-cli",
+  "webManifestUrl": "https://www.twinslocsarena.com/manifest.webmanifest",
+  "fallbackType": "customtabs",
+  "features": {},
+  "alphaDependencies": {
+    "enabled": false
+  },
+  "enableSiteSettingsShortcut": true,
+  "isChromeOSOnly": false,
+  "isMetaQuest": false,
+  "fullScopeUrl": "https://www.twinslocsarena.com/",
+  "minSdkVersion": 24,
+  "orientation": "default",
+  "fingerprints": [],
+  "additionalTrustedOrigins": [
+    "https://twinslocsarena.com"
+  ],
+  "retainedBundles": [],
+  "appVersion": "1.0.0"
+}
