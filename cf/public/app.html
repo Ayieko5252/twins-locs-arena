@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Get the Twins Locs Arena app</title>
+<meta name="description" content="Install the Twins Locs Arena app on Android or iPhone. Book loc sessions, shop loc care and see your appointments, straight from your home screen.">
+<link rel="canonical" href="https://www.twinslocsarena.com/app">
+<meta name="theme-color" content="#E9CB98" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1B100A" media="(prefers-color-scheme: dark)">
+<meta property="og:title" content="Get the Twins Locs Arena app">
+<meta property="og:description" content="Book loc sessions and shop loc care from your phone.">
+<meta property="og:url" content="https://www.twinslocsarena.com/app">
+<meta property="og:image" content="https://www.twinslocsarena.com/icons/icon-512.png">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/icons/icon-180.png">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Figtree:wght@400;500;600;700&family=Nunito:ital,wght@1,900&display=swap">
+<link rel="stylesheet" href="/brand.css">
+<link rel="stylesheet" href="/shop.css">
+<style>
+.app-hero{display:grid;grid-template-columns:1fr 280px;gap:36px;align-items:center;padding:clamp(24px,5vw,56px) 0}
+@media (max-width:760px){.app-hero{grid-template-columns:1fr;gap:20px}}
+.app-hero h1{font-size:clamp(2rem,5vw,3rem)}
+.app-hero p.lead{color:var(--ink-2);font-size:1.05rem;max-width:46ch;margin-top:10px}
+.phone{border:10px solid var(--ink);border-radius:36px;overflow:hidden;background:var(--surface);box-shadow:var(--shadow);aspect-ratio:9/19;display:grid;grid-template-rows:auto 1fr auto}
+.phone .bar{background:var(--ink);height:22px}
+.phone .screen{display:grid;place-items:center;gap:10px;padding:18px;text-align:center}
+.phone .screen img{width:76px}
+.phone .screen b{font-family:var(--f-display);font-weight:400;font-size:1.1rem}
+.phone .screen span{font-size:.78rem;color:var(--muted)}
+.phone .dock{display:flex;justify-content:space-around;padding:10px 6px;border-top:1px solid var(--line);font-size:.6rem;color:var(--muted)}
+.steps-two{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media (max-width:760px){.steps-two{grid-template-columns:1fr}}
+.plat{background:var(--surface);border-radius:16px;padding:22px;display:grid;gap:12px;align-content:start}
+.plat h2{font-size:1.5rem;display:flex;align-items:center;gap:10px}
+.plat ol{margin:0;padding-left:20px;display:grid;gap:8px;color:var(--ink-2)}
+.plat li strong{color:var(--ink)}
+.badge-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px}
+.why{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px}
+.why div{background:var(--surface);border-radius:14px;padding:16px 18px}
+.why h3{font-size:1.1rem;margin-bottom:4px}
+.why p{font-size:.92rem;color:var(--ink-2)}
+#installed{background:var(--ok-bg);color:var(--ok);border-radius:12px;padding:14px 16px;font-weight:600}
+</style>
+</head>
+<body>
+<header class="nav">
+  <div class="wrap">
+    <a class="brand" href="/"><img src="/favicon.svg" alt="" width="36" height="36" class="brand-mark"><span>Twins Locs Arena</span></a>
+    <nav class="nav-links" aria-label="Main">
+      <a href="/#services">Services</a>
+      <a href="/#work">Our work</a>
+      <a href="/#shop">Shop</a>
+      <a href="/#visit">Visit</a>
+    </nav>
+    <div class="nav-actions"><a class="btn sm" href="/#book">Book a session</a></div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="app-hero">
+    <div>
+      <span class="eyebrow">Android and iPhone</span>
+      <h1>Put the salon on your home screen</h1>
+      <p class="lead">The app is the same Twins Locs Arena you use in the browser: book a chair, shop loc care, see your appointments and offers. It opens full screen, with no address bar, and it keeps working when the signal drops.</p>
+      <div class="badge-row">
+        <button class="btn gold" id="installBtn" hidden>Install the app</button>
+        <a class="btn ghost" href="#android">Android steps</a>
+        <a class="btn ghost" href="#iphone">iPhone steps</a>
+      </div>
+      <p id="installed" hidden>The app is already installed on this phone. Open it from your home screen.</p>
+      <p class="hint" style="margin-top:10px">It costs nothing, takes about 20 MB of space, and needs no Play Store or App Store account.</p>
+    </div>
+    <div class="phone" aria-hidden="true">
+      <div class="bar"></div>
+      <div class="screen">
+        <img src="/favicon.svg" alt="">
+        <b>Twins Locs Arena</b>
+        <span>Enjoy the beauty in locs</span>
+      </div>
+      <div class="dock"><span>Home</span><span>Menu</span><span>Book</span><span>Shop</span><span>Bag</span></div>
+    </div>
+  </section>
+
+  <section class="steps-two" style="padding-bottom:30px">
+    <div class="plat" id="android">
+      <h2>Android</h2>
+      <ol>
+        <li>Open <strong>www.twinslocsarena.com</strong> in <strong>Chrome</strong>.</li>
+        <li>Tap the <strong>three dots</strong> at the top right.</li>
+        <li>Tap <strong>Add to Home screen</strong>, or <strong>Install app</strong> if you see it.</li>
+        <li>Tap <strong>Install</strong>. The loc icon appears with your other apps.</li>
+      </ol>
+      <p class="hint">Samsung Internet: tap the menu, then <strong>Add page to</strong>, then <strong>Home screen</strong>.</p>
+    </div>
+    <div class="plat" id="iphone">
+      <h2>iPhone and iPad</h2>
+      <ol>
+        <li>Open <strong>www.twinslocsarena.com</strong> in <strong>Safari</strong>. It must be Safari, not Chrome.</li>
+        <li>Tap the <strong>Share</strong> button at the bottom, the square with an arrow.</li>
+        <li>Scroll down and tap <strong>Add to Home Screen</strong>.</li>
+        <li>Tap <strong>Add</strong> at the top right.</li>
+      </ol>
+      <p class="hint">Works on iOS 16.4 and newer.</p>
+    </div>
+  </section>
+
+  <section style="padding-bottom:40px">
+    <h2 style="font-size:1.6rem;margin-bottom:14px">What you get</h2>
+    <div class="why">
+      <div><h3>Book in seconds</h3><p>Your name and phone are already filled in, so a retwist takes three taps.</p></div>
+      <div><h3>Your own history</h3><p>Past visits, orders and loyalty, all in one place.</p></div>
+      <div><h3>Offers first</h3><p>Salon offers show in the app before anywhere else.</p></div>
+      <div><h3>Works offline</h3><p>The menu and prices stay readable when the network drops.</p></div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>&copy; <span id="yr"></span> Twins Locs Arena</span>
+    <span class="foot-note">Eldoret, Kenya &middot; +254 113 394402 &middot; +254 741 569288</span>
+    <a class="link-btn" href="/">Back to the shop</a>
+  </div>
+</footer>
+
+<div class="toast" id="toast" hidden role="status"></div>
+<script src="/app-install.js" defer></script>
+</body>
+</html>

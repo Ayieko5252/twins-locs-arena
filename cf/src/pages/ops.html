@@ -33,6 +33,10 @@
 .topbar{display:none}
 .dept-dot{width:10px;height:10px;border-radius:50%;display:inline-block}
 .secret-box{background:var(--gold-soft);border-radius:10px;padding:12px 14px;display:grid;gap:6px}
+.photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px}
+.photo{margin:0;background:var(--surface);border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
+.photo img{width:100%;aspect-ratio:4/5;object-fit:cover;background:var(--surface-2)}
+.photo figcaption{padding:12px 14px 14px;display:grid;gap:6px}
 .agent-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
 .agent{background:var(--surface);border-radius:14px;padding:16px;display:grid;gap:8px;align-content:start;cursor:pointer;border:1.5px solid transparent;text-align:left;color:inherit;font:inherit}
 .agent:hover{border-color:var(--gold)}
@@ -143,6 +147,7 @@ const ICONS = {
   offer: '<path d="M20.5 12 12 20.5 3.5 12 12 3.5z"/><circle cx="12" cy="12" r="2.5"/>', folder: '<path d="M3 7h6l2 2h10v10H3z"/>',
   agent: '<rect x="4" y="7" width="16" height="12" rx="3"/><path d="M12 3v4M9 13h.01M15 13h.01M9.5 16h5"/>',
   visitors: '<circle cx="9" cy="8" r="3.2"/><path d="M3 20c.6-3.4 3-5.3 6-5.3s5.4 1.9 6 5.3"/><circle cx="17" cy="9" r="2.4"/><path d="M16.5 14.6c2.4.2 4 1.9 4.5 4.6"/>',
+  photo: '<rect x="3" y="5" width="18" height="14" rx="2.5"/><circle cx="8.5" cy="10" r="1.8"/><path d="M4 17l5-4 3 2.5L16 11l4 4"/>',
   settings: '<path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/>',
   shield: '<path d="M12 3l8 3v6c0 5-3.4 8.4-8 9-4.6-.6-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/>',
 };
@@ -549,6 +554,31 @@ VIEWS.agents = async (main) => {
       <span class="hint">${ago(r.created_at)}</span></div>`).join("")}</div></div>` : ""}`;
 };
 
+VIEWS.gallery = async (main) => {
+  const d = await api("ops/gallery");
+  S.data.photos = d.photos;
+  const live = d.photos.filter((p) => p.published && p.consent).length;
+  main.innerHTML = header("Our work", `${d.canEdit ? `<button class="btn gold sm" data-act="add-photo">Add a photo</button>` : ""}<button class="btn ghost sm" data-act="reload">Refresh</button>`) + `
+    <p class="hint">Photos of work done on real clients. A photo only appears on the website once the client has agreed and someone publishes it. ${live} of ${d.photos.length} are on the website now.</p>
+    <div class="photo-grid">${d.photos.map((p) => `<figure class="photo">
+      <img src="${esc(p.img)}" alt="${esc(p.title)}" loading="lazy">
+      <figcaption>
+        <strong>${esc(p.title)}</strong>
+        <span class="hint">${esc(p.service || "")}${p.client_name ? ` \u00b7 ${esc(p.client_name)}` : ""}</span>
+        <span class="row">
+          ${p.consent ? `<span class="tag s-active">consent given</span>` : `<span class="tag s-low">no consent</span>`}
+          ${p.published ? `<span class="tag s-done">on the website</span>` : `<span class="tag">hidden</span>`}
+          ${p.featured ? `<span class="tag s-approved">featured</span>` : ""}
+        </span>
+        ${d.canEdit ? `<span class="row">
+          <button class="btn ghost sm" data-act="edit-photo" data-id="${esc(p.id)}">Edit</button>
+          ${d.canPublish ? `<button class="btn sm" data-act="toggle-photo" data-id="${esc(p.id)}" data-pub="${p.published ? 0 : 1}" ${p.consent ? "" : "disabled"}>${p.published ? "Take down" : "Put on website"}</button>` : ""}
+          <button class="btn ghost sm" data-act="delete-photo" data-id="${esc(p.id)}">Delete</button>
+        </span>` : ""}
+      </figcaption>
+    </figure>`).join("") || `<p class="empty">No photos yet. Add the first one after a session, with the client's permission.</p>`}</div>`;
+};
+
 VIEWS.visitors = async (main) => {
   const d = await api("ops/visitors");
   main.innerHTML = header("Visitors") + `
@@ -821,9 +851,15 @@ document.addEventListener("click", async (e) => {
           <div class="field"><label>Price from (shillings)</label><input name="price" type="number" value="${shillings(s.price_cents)}" required></div></div>
           <div class="row2"><div class="field"><label>Time needed</label><input name="dur" value="${esc(s.dur || "")}" placeholder="2-3 hrs"></div>
           <div class="field"><label>Come back in</label><input name="care" value="${esc(s.care || "")}" placeholder="Every 4-6 wks"></div></div>
-          <div class="field"><label>Description</label><textarea name="descr">${esc(s.descr || "")}</textarea></div>`,
+          <div class="field"><label>Description</label><textarea name="descr">${esc(s.descr || "")}</textarea></div>
+          <div class="field"><label>Photo of this service</label><input name="photo" type="file" accept="image/*">
+            ${s.img ? `<label class="hint"><input type="checkbox" name="removeImg"> Remove the photo it has now</label>` : ""}</div>`,
           { submit: "Save service", onSubmit: async (fd) => {
-            await api("ops/catalog/service", { method: "PUT", body: { id, name: val(fd, "name"), cat: val(fd, "cat"), price: Number(val(fd, "price")), dur: val(fd, "dur"), care: val(fd, "care"), descr: val(fd, "descr") } });
+            const file = fd.get("photo");
+            const body = { id, name: val(fd, "name"), cat: val(fd, "cat"), price: Number(val(fd, "price")), dur: val(fd, "dur"), care: val(fd, "care"), descr: val(fd, "descr") };
+            if (file && file.size) body.imgData = await fileToDataUrl(file, 1200);
+            if (fd.get("removeImg") === "on") body.removeImg = true;
+            await api("ops/catalog/service", { method: "PUT", body });
             toast("Saved."); S.data.catalog = null; render("catalog");
           } });
       }
@@ -971,6 +1007,71 @@ document.addEventListener("click", async (e) => {
             await api("ops/clients", { method: "PUT", body: { id, name: val(fd, "name"), phone: val(fd, "phone"), notes: val(fd, "notes") } });
             toast("Saved."); render("clients");
           } });
+      }
+
+      case "add-photo": {
+        const cat = S.data.catalog || await api("ops/catalog");
+        S.data.catalog = cat;
+        return openDialog("Add a photo of our work", `
+          <div class="notice"><strong>Ask the client first.</strong>
+            <span class="hint">A photo of someone's hair only goes on the website if they have said yes. Write down how they agreed, so there is a record.</span></div>
+          <div class="field"><label>Photo</label><input name="photo" type="file" accept="image/*" required></div>
+          <div class="field"><label>Short title</label><input name="title" placeholder="Microlocs, shoulder length" required></div>
+          <div class="row2">
+            <div class="field"><label>Service</label><select name="serviceId"><option value="">Not linked to a service</option>${cat.services.map((s) => `<option value="${esc(s.id)}">${esc(s.name)}</option>`).join("")}</select></div>
+            <div class="field"><label>Client name (staff only)</label><input name="clientName" placeholder="Never shown on the website"></div>
+          </div>
+          <div class="field"><label>Caption for the website</label><textarea name="caption" placeholder="Four hours, finished with gold cuffs"></textarea></div>
+          <label class="row"><input type="checkbox" name="consent"> <span>The client agreed we can show this photo</span></label>
+          <div class="field"><label>How they agreed</label><input name="consentNote" placeholder="Said yes in the salon, 12 Nov"></div>
+          <label class="row"><input type="checkbox" name="published" checked> <span>Put it on the website now (needs consent)</span></label>
+          <label class="row"><input type="checkbox" name="featured"> <span>Show it first</span></label>`,
+          { submit: "Add photo", onSubmit: async (fd) => {
+            const file = fd.get("photo");
+            if (!file || !file.size) throw new Error("Choose a photo first.");
+            await api("ops/gallery", { method: "POST", body: {
+              imgData: await fileToDataUrl(file, 1400), title: val(fd, "title"), serviceId: val(fd, "serviceId"),
+              clientName: val(fd, "clientName"), caption: val(fd, "caption"),
+              consent: fd.get("consent") === "on", consentNote: val(fd, "consentNote"),
+              published: fd.get("published") === "on", featured: fd.get("featured") === "on",
+            } });
+            toast("Photo added."); render("gallery");
+          } });
+      }
+
+      case "edit-photo": {
+        const photo = (S.data.photos || []).find((x) => x.id === id);
+        if (!photo) return;
+        return openDialog("Edit photo", `
+          <img src="${esc(photo.img)}" alt="" style="width:100%;max-height:260px;object-fit:cover;border-radius:10px">
+          <div class="field"><label>Short title</label><input name="title" value="${esc(photo.title)}"></div>
+          <div class="field"><label>Caption for the website</label><textarea name="caption">${esc(photo.caption || "")}</textarea></div>
+          <div class="field"><label>Client name (staff only)</label><input name="clientName" value="${esc(photo.client_name || "")}"></div>
+          <label class="row"><input type="checkbox" name="consent" ${photo.consent ? "checked" : ""}> <span>The client agreed we can show this photo</span></label>
+          <div class="field"><label>How they agreed</label><input name="consentNote" value="${esc(photo.consent_note || "")}"></div>
+          <label class="row"><input type="checkbox" name="published" ${photo.published ? "checked" : ""}> <span>On the website</span></label>
+          <label class="row"><input type="checkbox" name="featured" ${photo.featured ? "checked" : ""}> <span>Show it first</span></label>`,
+          { submit: "Save", onSubmit: async (fd) => {
+            await api("ops/gallery", { method: "PUT", body: {
+              id, title: val(fd, "title"), caption: val(fd, "caption"), clientName: val(fd, "clientName"),
+              consent: fd.get("consent") === "on", consentNote: val(fd, "consentNote"),
+              published: fd.get("published") === "on", featured: fd.get("featured") === "on",
+            } });
+            toast("Saved."); render("gallery");
+          } });
+      }
+
+      case "toggle-photo": {
+        await busy(t, "Saving...", () => api("ops/gallery", { method: "PUT", body: { id, published: t.dataset.pub === "1" } }));
+        toast(t.dataset.pub === "1" ? "Now on the website." : "Taken off the website.");
+        return render("gallery");
+      }
+
+      case "delete-photo": {
+        if (!confirm("Delete this photo for good? It disappears from the website straight away.")) return;
+        await api("ops/gallery", { method: "DELETE", body: { id } });
+        toast("Photo deleted.");
+        return render("gallery");
       }
 
       case "open-agent": {

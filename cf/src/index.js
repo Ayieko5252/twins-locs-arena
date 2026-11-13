@@ -92,6 +92,15 @@ async function serveStoredFile(key, request, env) {
   if (!key || key.includes("..")) return fail(404, "Not found");
   if (key.startsWith("products/")) return serveFile(env.FILES, key);
 
+  // A client photo is only public once the client agreed and staff published it.
+  if (key.startsWith("gallery/")) {
+    const row = await env.DB.prepare("SELECT published, consent FROM gallery WHERE img_key = ?1").bind(key).first();
+    if (row?.published && row?.consent) return serveFile(env.FILES, key);
+    const viewer = await currentStaff(request, env);
+    if (!viewer || !can(viewer, "gallery.view")) return fail(404, "Not found");
+    return serveFile(env.FILES, key);
+  }
+
   const needed = key.startsWith("docs/") ? "documents.view" : key.startsWith("receipts/") ? "expenses.view" : null;
   if (!needed) return fail(404, "Not found");
 

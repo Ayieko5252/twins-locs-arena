@@ -241,7 +241,7 @@ export async function opsRoutes(parts, request, env, ctx) {
           env.DB.prepare("SELECT * FROM products ORDER BY cat, name").all(),
         ]);
         return json({
-          services: services.results || [],
+          services: (services.results || []).map((s) => ({ ...s, img: s.img_key ? `/file/${s.img_key}` : "" })),
           products: stripAll("product", products.results, staff).map((p) => ({ ...p, img: p.img_key ? `/file/${p.img_key}` : "" })),
           categories: { product: P_CATS, service: S_CATS, kinds: KINDS },
           vat: { pct: settings.vatPct, inclusive: Boolean(settings.vatInclusive) },
@@ -254,11 +254,18 @@ export async function opsRoutes(parts, request, env, ctx) {
         const existing = await env.DB.prepare("SELECT price_cents FROM services WHERE id = ?1").bind(id).first();
         if (existing && existing.price_cents !== price) requireCap(staff, "price.edit");
         if (!str(body.name, 80)) return fail(400, "A service needs a name.");
-        await env.DB.prepare(`INSERT INTO services (id, cat, name, price_cents, dur, care, descr, active, sort)
-                              VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)
-                              ON CONFLICT(id) DO UPDATE SET cat=?2, name=?3, price_cents=?4, dur=?5, care=?6, descr=?7, active=?8`)
+        let svcImg = existing ? (await env.DB.prepare("SELECT img_key FROM services WHERE id = ?1").bind(id).first())?.img_key || "" : "";
+        if (body.imgData) {
+          svcImg = (await putDataUrl(env.FILES, `products/service-${id}-${Date.now().toString(36)}`, body.imgData, 3_000_000)).key;
+        } else if (body.removeImg && svcImg) {
+          await env.FILES.delete(svcImg).catch(() => {});
+          svcImg = "";
+        }
+        await env.DB.prepare(`INSERT INTO services (id, cat, name, price_cents, dur, care, descr, img_key, active, sort)
+                              VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)
+                              ON CONFLICT(id) DO UPDATE SET cat=?2, name=?3, price_cents=?4, dur=?5, care=?6, descr=?7, img_key=?8, active=?9`)
           .bind(id, oneOf(str(body.cat, 20), S_CATS, "Style"), str(body.name, 80), price, str(body.dur, 30),
-            str(body.care, 60), str(body.descr, 300), body.active === false ? 0 : 1, int(body.sort)).run();
+            str(body.care, 60), str(body.descr, 300), svcImg, body.active === false ? 0 : 1, int(body.sort)).run();
         await log(existing ? "service.updated" : "service.created", str(body.name, 80));
         return json({ ok: true, id });
       }
@@ -530,6 +537,65 @@ export async function opsRoutes(parts, request, env, ctx) {
         await env.DB.prepare("DELETE FROM documents WHERE id = ?1").bind(str(body.id, 40)).run();
         await log("document.deleted", doc?.title || str(body.id, 40));
         return json({ ok: true });
+      }
+      break;
+    }
+
+    /* ------------------------------------------------------------ our work */
+    case "gallery": {
+      requireCap(staff, "gallery.view");
+      if (method === "GET") {
+        const rows = await env.DB.prepare("SELECT * FROM gallery ORDER BY featured DESC, sort, created_at DESC LIMIT 200").all();
+        return json({
+          photos: (rows.results || []).map((g) => ({ ...g, img: `/file/${g.img_key}` })),
+          canEdit: can(staff, "gallery.edit"),
+          canPublish: can(staff, "gallery.publish"),
+        });
+      }
+      if (method === "POST") {
+        requireCap(staff, "gallery.edit");
+        if (!body.imgData) return fail(400, "Choose a photo to add.");
+        const title = str(body.title, 80);
+        if (!title) return fail(400, "Give the photo a short title, for example 'Microlocs, shoulder length'.");
+        const consent = body.consent ? 1 : 0;
+        // A client photo only goes public when the client has agreed to it.
+        if (!consent && body.published) return fail(400, "Tick the consent box before putting a client photo on the website.");
+        const id = newId("pic");
+        const saved = await putDataUrl(env.FILES, `gallery/${id}`, body.imgData, 3_000_000);
+        const service = await env.DB.prepare("SELECT name FROM services WHERE id = ?1").bind(str(body.serviceId, 40)).first();
+        await env.DB.prepare(`INSERT INTO gallery (id, title, service_id, service, caption, img_key, client_name, consent, consent_note, published, featured, sort, uploaded_by)
+                              VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13)`)
+          .bind(id, title, str(body.serviceId, 40) || null, service?.name || str(body.service, 80), str(body.caption, 300),
+            saved.key, str(body.clientName, 80), consent, str(body.consentNote, 200),
+            consent && body.published !== false && can(staff, "gallery.publish") ? 1 : 0,
+            body.featured ? 1 : 0, int(body.sort), staff.id).run();
+        await log("gallery.added", title, consent ? "with consent" : "no consent yet");
+        return json({ ok: true, id }, 201);
+      }
+      if (method === "PUT") {
+        requireCap(staff, "gallery.edit");
+        const id = str(body.id, 40);
+        const photo = await env.DB.prepare("SELECT * FROM gallery WHERE id = ?1").bind(id).first();
+        if (!photo) return fail(404, "That photo is gone. Refresh to see the latest.");
+        const consent = body.consent === undefined ? photo.consent : (body.consent ? 1 : 0);
+        let published = body.published === undefined ? photo.published : (body.published ? 1 : 0);
+        if (published && !consent) return fail(400, "A client photo cannot go on the website without the client's agreement.");
+        if (published && !can(staff, "gallery.publish")) return fail(403, "Only management or administration can put a photo on the website.");
+        await env.DB.prepare(`UPDATE gallery SET title = ?2, caption = ?3, client_name = ?4, consent = ?5, consent_note = ?6,
+                              published = ?7, featured = ?8, sort = ?9 WHERE id = ?1`)
+          .bind(id, str(body.title, 80) || photo.title, str(body.caption, 300), str(body.clientName, 80),
+            consent, str(body.consentNote, 200), published, body.featured ? 1 : 0, int(body.sort)).run();
+        await log("gallery.updated", photo.title, published ? "on the website" : "hidden");
+        return json({ ok: true });
+      }
+      if (method === "DELETE") {
+        requireCap(staff, "gallery.edit");
+        const photo = await env.DB.prepare("SELECT * FROM gallery WHERE id = ?1").bind(str(body.id, 40)).first();
+        if (!photo) return fail(404, "That photo is already gone.");
+        await env.FILES.delete(photo.img_key).catch(() => {});
+        await env.DB.prepare("DELETE FROM gallery WHERE id = ?1").bind(photo.id).run();
+        await log("gallery.deleted", photo.title);
+        return json({ ok: true, message: "Photo removed from the website and from storage." });
       }
       break;
     }

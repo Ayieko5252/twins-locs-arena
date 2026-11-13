@@ -15,7 +15,7 @@ const publicProduct = (p) => ({
   img: p.img_key ? `/file/${p.img_key}` : "",
 });
 
-const publicService = (s) => ({ id: s.id, cat: s.cat, name: s.name, price: s.price_cents, dur: s.dur, care: s.care, descr: s.descr });
+const publicService = (s) => ({ id: s.id, cat: s.cat, name: s.name, price: s.price_cents, dur: s.dur, care: s.care, descr: s.descr, img: s.img_key ? `/file/${s.img_key}` : "" });
 
 export async function loadCatalog(env) {
   const [services, products, settings] = await Promise.all([
@@ -60,14 +60,21 @@ export async function publicRoutes(parts, request, env, ctx) {
     await ensureSeeded(env.DB);
     const settings = await getSettings(env.DB);
     const today = todayIn(settings.timezone);
-    const [catalog, taken, offers] = await Promise.all([
+    const [catalog, taken, offers, gallery] = await Promise.all([
       loadCatalog(env),
       takenMap(env, today),
       env.DB.prepare(`SELECT id, title, detail, discount_pct, code FROM offers
                       WHERE active = 1 AND (starts_on IS NULL OR starts_on <= ?1) AND (ends_on IS NULL OR ends_on >= ?1)
                       ORDER BY created_at DESC LIMIT 6`).bind(today).all(),
+      // Only photos the client agreed to, and only once staff publish them.
+      env.DB.prepare(`SELECT id, title, service, caption, img_key, featured FROM gallery
+                      WHERE published = 1 AND consent = 1 ORDER BY featured DESC, sort, created_at DESC LIMIT 24`).all(),
     ]);
-    return json({ ...catalog, taken, today, offers: offers.results || [] });
+    return json({
+      ...catalog, taken, today,
+      offers: offers.results || [],
+      gallery: (gallery.results || []).map((g) => ({ id: g.id, title: g.title, service: g.service, caption: g.caption, img: `/file/${g.img_key}`, featured: g.featured })),
+    });
   }
 
   if (head === "visit" && method === "POST") return recordVisit(request, env);

@@ -16,7 +16,7 @@ const CART_KEY = "tla-cart-v2", CATALOG_KEY = "tla-catalog-v2", SIGNED_KEY = "tl
 const readLS = (k) => { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } };
 const writeLS = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
 
-const S = { services: [], products: [], offers: [], taken: {}, settings: { currency: "KSh", chairs: 2, open: 8, close: 18, depositPct: 30 }, me: null };
+const S = { services: [], products: [], offers: [], gallery: [], taken: {}, settings: { currency: "KSh", chairs: 2, open: 8, close: 18, depositPct: 30 }, me: null };
 Object.assign(S, readLS(CATALOG_KEY) || {});
 let cart = readLS(CART_KEY) || [];
 let ful = "pickup", pickedSlot = null, acctTab = "signin";
@@ -85,8 +85,8 @@ function nextOpen() {
 async function loadCatalog(quiet) {
   try {
     const c = await api("catalog");
-    Object.assign(S, { services: c.services, products: c.products, settings: c.settings, taken: c.taken, offers: c.offers || [] });
-    writeLS(CATALOG_KEY, { services: c.services, products: c.products, settings: c.settings, offers: c.offers });
+    Object.assign(S, { services: c.services, products: c.products, settings: c.settings, taken: c.taken, offers: c.offers || [], gallery: c.gallery || [] });
+    writeLS(CATALOG_KEY, { services: c.services, products: c.products, settings: c.settings, offers: c.offers, gallery: c.gallery });
     cart = cart.filter((x) => S.products.some((p) => p.id === x.id));
     renderAll();
   } catch (e) {
@@ -114,10 +114,26 @@ function renderAll() {
   $("#svcFilters").innerHTML = cats.map((c) => `<button class="chip" data-svc-cat="${esc(c)}" aria-pressed="${c === svcCat}">${esc(c)}</button>`).join("");
   $("#menu").innerHTML = S.services.filter((s) => svcCat === "All" || s.cat === svcCat).map((s) => `
     <div class="m-row">
+      <div class="m-head">
+        ${s.img ? `<img class="m-photo" src="${esc(s.img)}" alt="${esc(s.name)}" loading="lazy" width="54" height="54">` : ""}
+        <div>
       <div class="m-top"><span class="m-name">${esc(s.name)}</span><span class="m-lead"></span><span class="m-price num"><small>from</small>${money(s.price)}</span></div>
       <p class="m-desc">${esc(s.descr)}</p>
       <div class="m-foot"><span>${esc(s.dur)}</span>${s.care ? `<span class="dot"></span><span>${esc(s.care)}</span>` : ""}<button class="link-btn" data-action="book" data-id="${esc(s.id)}">Book this</button></div>
+        </div>
+      </div>
     </div>`).join("") || `<p class="empty">No services in this category yet.</p>`;
+
+  // our work
+  const work = $("#work-grid");
+  if (work) {
+    const section = document.getElementById("work");
+    if (section) section.hidden = !S.gallery.length;
+    work.innerHTML = S.gallery.map((g) => `<figure class="work">
+      <img src="${esc(g.img)}" alt="${esc(g.title)}" loading="lazy">
+      <figcaption><strong>${esc(g.title)}</strong>${g.service ? `<span>${esc(g.service)}</span>` : ""}${g.caption ? `<span>${esc(g.caption)}</span>` : ""}</figcaption>
+    </figure>`).join("");
+  }
 
   // shop
   const shopCat = S.shopCat || "All";

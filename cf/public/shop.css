@@ -72,6 +72,15 @@
 .p-size{font-size:.86rem;color:var(--muted)}
 .p-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:auto;padding-top:10px}
 .p-price{font-weight:700}
+.work-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}
+.work{margin:0;background:var(--surface);border-radius:14px;overflow:hidden}
+.work img{width:100%;aspect-ratio:4/5;object-fit:cover;display:block;background:var(--surface-2)}
+.work figcaption{padding:12px 14px 14px;display:grid;gap:3px}
+.work strong{font-family:var(--f-display);font-weight:400;font-size:1.05rem}
+.work span{font-size:.85rem;color:var(--muted)}
+.m-photo{width:54px;height:54px;border-radius:10px;object-fit:cover;flex:none;background:var(--surface-2)}
+.m-head{display:flex;gap:12px;align-items:flex-start}
+.m-head > div{flex:1;min-width:0}
 .a-body{fill:var(--loc)}.a-cap{fill:var(--ink)}.a-label{fill:var(--surface)}.a-gold{fill:var(--gold)}.a-line{stroke:var(--ink);fill:none;stroke-width:6;stroke-linecap:round}
 
 /* steps, visit, contact */
