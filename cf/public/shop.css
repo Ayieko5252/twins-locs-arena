@@ -44,7 +44,7 @@
 .centre::after{content:"";position:absolute;inset:-16px;border-radius:50%;border:1.5px solid var(--gold);opacity:.4;pointer-events:none}
 .tagline{font-family:var(--f-tag);font-style:italic;font-weight:900;font-size:clamp(1.4rem,3.4vw,2.4rem);text-align:center;margin-top:clamp(18px,3vw,30px);
   background:linear-gradient(100deg,var(--gold-deep),var(--gold-bright) 45%,var(--gold-deep));-webkit-background-clip:text;background-clip:text;color:transparent;
-  filter:drop-shadow(2px 2px 0 var(--tag-shadow))}
+  filter:drop-shadow(0 2px 3px var(--tag-shadow))}
 .offers{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:18px}
 .offer-chip{background:var(--gold-soft);border-radius:999px;padding:.5em 1.1em;font-weight:600;font-size:.9rem}
 

@@ -20,8 +20,8 @@
     "path": "./twinslocsarena.keystore",
     "alias": "twinslocs"
   },
-  "appVersionName": "1.0.0",
-  "appVersionCode": 1,
+  "appVersionName": "1.0.1",
+  "appVersionCode": 2,
   "shortcuts": [
     {
       "name": "Book a session",
@@ -60,5 +60,5 @@
     "https://twinslocsarena.com"
   ],
   "retainedBundles": [],
-  "appVersion": "1.0.0"
+  "appVersion": "1.0.1"
 }
