@@ -3,11 +3,11 @@
 // one-time nonce, which is what lets the site run without 'unsafe-inline'.
 
 import opsHtml from "./pages/ops.html";
-import staffLoginHtml from "./pages/staff-login.html";
+import setupHtml from "./pages/setup.html";
 import staffResetHtml from "./pages/staff-reset.html";
 import { randomId, securityHeaders } from "./lib/security.js";
 import { currentStaff } from "./routes/staff.js";
-import { getSettings } from "./lib/db.js";
+import { getSettings, ownerExists } from "./lib/db.js";
 
 function page(html, { googleSignIn = false } = {}) {
   const nonce = randomId(16);
@@ -21,14 +21,27 @@ const redirect = (to) => new Response(null, { status: 303, headers: { Location: 
 export async function servePage(path, request, env) {
   if (path === "/ops" || path.startsWith("/ops/")) {
     const staff = await currentStaff(request, env, { requireTwoFactor: false });
-    if (!staff) return redirect("/staff");
+    if (!staff) return redirect("/?signin=1");
     return page(opsHtml);
   }
 
+  // There is one sign-in for the whole business, on the front page, and what
+  // you type there decides where you land. /staff is kept only so old links
+  // and bookmarks still arrive somewhere sensible.
   if (path === "/staff") {
     const staff = await currentStaff(request, env, { requireTwoFactor: false });
     if (staff) return redirect("/ops");
-    return page(staffLoginHtml);
+    return redirect("/?signin=1");
+  }
+
+  // The one-time first run, where the owner account is claimed. The page sends
+  // itself away again once an owner exists.
+  if (path === "/setup") {
+    const staff = await currentStaff(request, env, { requireTwoFactor: false });
+    if (staff) return redirect("/ops");
+    // Once the salon has an owner this page has no reason to exist.
+    if (await ownerExists(env.DB).catch(() => true)) return redirect("/?signin=1");
+    return page(setupHtml);
   }
 
   if (path === "/staff-reset") return page(staffResetHtml);

@@ -8,6 +8,7 @@ import { hashPassword, verifyPassword, passwordProblem, newTotpSecret, totpCode,
 import { capabilitiesFor, can, strip, sectionsFor } from "../src/lib/perms.js";
 import { toCents, fromCents, priceFromCost, marginAfterVat, email, phoneDigits, validPhone, isDate, addDays, oneOf, int, str } from "../src/lib/util.js";
 import { postJournal, moveStock, profitAndLoss } from "../src/lib/books.js";
+import { signinRoutes } from "../src/routes/signin.js";
 import { fakeDb, ran } from "./fake-db.mjs";
 
 /* ---------------------------------------------------------------- passwords */
@@ -238,4 +239,72 @@ test("profit and loss adds income up and costs down", async () => {
   assert.equal(pl.totalIncome, 570000);
   assert.equal(pl.totalExpenses, 240000);
   assert.equal(pl.profit, 330000);
+});
+
+/* ---------------------------------------------------- one door for everybody */
+// The username decides the room. These tests guard the single sign-in, because
+// a mistake here either locks the salon out or lets the wrong person in.
+test("the name typed at the one sign-in decides which room opens", async () => {
+  const staffHash = await hashPassword("ChairGold2026", 10000);
+  const clientHash = await hashPassword("RoseWater2026", 10000);
+
+  const db = fakeDb({ rows: {
+    "FROM settings": [],
+    "FROM employees WHERE email": (args) => (args[0] === "loctician@twinslocsarena.com"
+      ? { id: "emp_1", name: "Senior Loctician", email: args[0], department: "employee", role: "loctician", status: "active", password_hash: staffHash, totp_enabled: 0 }
+      : null),
+    "FROM customers WHERE email": (args) => (args[0] === "mary@example.com"
+      ? { id: "cus_1", name: "Mary", email: args[0], password_hash: clientHash }
+      : null),
+  } });
+
+  const ask = (body) => signinRoutes(["signin"], new Request("https://x.test/api/signin", {
+    method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body),
+  }), { DB: db }, { waitUntil() {} });
+
+  const staff = await (await ask({ who: "loctician", password: "ChairGold2026" })).json();
+  assert.equal(staff.kind, "staff");
+  assert.equal(staff.go, "/ops", "a username opens the Operations Hub");
+
+  const client = await (await ask({ who: "mary@example.com", password: "RoseWater2026" })).json();
+  assert.equal(client.kind, "client");
+  assert.equal(client.go, "/portal", "an email opens that client's own portal");
+
+  const wrong = await ask({ who: "loctician", password: "ChairGold2027" });
+  assert.equal(wrong.status, 401);
+  const stranger = await ask({ who: "nobody", password: "ChairGold2026" });
+  assert.equal(stranger.status, 401);
+  assert.equal((await stranger.json()).error, (await wrong.json()).error,
+    "the same answer either way, so nobody can fish for usernames");
+});
+
+test("a staff member with two-step is asked for the code before any session exists", async () => {
+  const hash = await hashPassword("ChairGold2026", 10000);
+  const db = fakeDb({ rows: {
+    "FROM settings": [],
+    "FROM employees WHERE email": { id: "emp_2", name: "Owner", email: "owner@twinslocsarena.com", department: "management", role: "owner", status: "active", password_hash: hash, totp_enabled: 1, totp_secret: newTotpSecret() },
+  } });
+  const res = await signinRoutes(["signin"], new Request("https://x.test/api/signin", {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ who: "owner", password: "ChairGold2026" }),
+  }), { DB: db }, { waitUntil() {} });
+
+  assert.equal((await res.json()).twoFactorRequired, true);
+  assert.equal(res.headers.get("Set-Cookie"), null, "no cookie until the code is right");
+  assert.equal(ran(db, "INSERT INTO sessions").length, 0, "and no session either");
+});
+
+test("an account that is not active cannot sign in", async () => {
+  const hash = await hashPassword("ChairGold2026", 10000);
+  const db = fakeDb({ rows: {
+    "FROM settings": [],
+    "FROM employees WHERE email": { id: "emp_3", name: "Left Last Year", email: "gone@twinslocsarena.com", department: "employee", role: "loctician", status: "suspended", password_hash: hash, totp_enabled: 0 },
+  } });
+  const res = await signinRoutes(["signin"], new Request("https://x.test/api/signin", {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ who: "gone", password: "ChairGold2026" }),
+  }), { DB: db }, { waitUntil() {} });
+
+  assert.equal(res.status, 401);
+  assert.equal(ran(db, "INSERT INTO sessions").length, 0);
 });

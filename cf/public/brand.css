@@ -33,6 +33,7 @@
     --ink:#F2E4C0; --ink-2:#DCCB9E; --muted:#9C9179;
     --line:rgba(242,228,192,.13); --line-strong:rgba(242,228,192,.28);
     --loc:#B9703F; --gold:#D9A93C; --gold-soft:rgba(217,169,60,.2);
+    --green:#D9A93C; --green-deep:#A5760F; --green-line:#E9C45A; --on-green:#120F06;
     --tag-shadow:rgba(0,0,0,.6);
     --ok:#86C78D; --ok-bg:rgba(134,199,141,.16); --warn:#E8B45A; --warn-bg:rgba(232,180,90,.16);
     --bad:#EC8A76; --bad-bg:rgba(236,138,118,.14); --info:#8FC2CF; --info-bg:rgba(143,194,207,.14);
@@ -46,6 +47,7 @@
   --ink:#F2E4C0; --ink-2:#DCCB9E; --muted:#9C9179;
   --line:rgba(242,228,192,.13); --line-strong:rgba(242,228,192,.28);
   --loc:#B9703F; --gold:#D9A93C; --gold-soft:rgba(217,169,60,.2);
+  --green:#D9A93C; --green-deep:#A5760F; --green-line:#E9C45A; --on-green:#120F06;
   --tag-shadow:rgba(0,0,0,.6);
   --ok:#86C78D; --ok-bg:rgba(134,199,141,.16); --warn:#E8B45A; --warn-bg:rgba(232,180,90,.16);
   --bad:#EC8A76; --bad-bg:rgba(236,138,118,.14); --info:#8FC2CF; --info-bg:rgba(143,194,207,.14);

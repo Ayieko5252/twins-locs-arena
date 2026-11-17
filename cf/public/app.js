@@ -19,7 +19,7 @@ const writeLS = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } 
 const S = { services: [], products: [], offers: [], gallery: [], taken: {}, settings: { currency: "KSh", chairs: 2, open: 8, close: 18, depositPct: 30 }, me: null };
 Object.assign(S, readLS(CATALOG_KEY) || {});
 let cart = readLS(CART_KEY) || [];
-let ful = "pickup", pickedSlot = null, acctTab = "signin";
+let ful = "pickup", pickedSlot = null, acctTab = "signin", needCode = false, acctDraft = { who: "", pass: "" };
 
 const money = (cents) => `${S.settings.currency} ${(Math.round(cents || 0) / 100).toLocaleString("en-US", { maximumFractionDigits: 2 })}`;
 
@@ -340,7 +340,7 @@ function renderAccount() {
   const tabs = [["signin", "Sign in"], ["signup", "Create account"], ["forgot", "Forgot password"]];
   body.innerHTML = `
     <div class="grab" aria-hidden="true"></div>
-    <div class="spread"><span class="eyebrow">Client account</span><button type="button" class="x" data-action="close-dlg" aria-label="Close">×</button></div>
+    <div class="spread"><span class="eyebrow">Sign in</span><button type="button" class="x" data-action="close-dlg" aria-label="Close">×</button></div>
     <h2>${acctTab === "signup" ? "Create your account" : acctTab === "forgot" ? "Reset your password" : "Welcome back"}</h2>
     <div class="tabs-row" role="tablist">${tabs.map(([k, l]) => `<button type="button" role="tab" aria-selected="${k === acctTab}" data-acct-tab="${k}">${l}</button>`).join("")}</div>
     ${S.settings.googleClientId ? `<div class="gsi-wrap" id="gsiBtn"><span class="hint">Loading Google sign-in…</span></div><p class="hint" style="text-align:center">or use your email</p>` : ""}
@@ -348,13 +348,21 @@ function renderAccount() {
       ${acctTab === "signup" ? `<div class="row2">
         <div class="field"><label for="aName">Your name</label><input id="aName" autocomplete="name" required></div>
         <div class="field"><label for="aPhone">Phone</label><input id="aPhone" type="tel" inputmode="tel" autocomplete="tel"></div></div>` : ""}
-      <div class="field"><label for="aEmail">Email</label><input id="aEmail" type="email" autocomplete="username" required></div>
+      <div class="field"><label for="aEmail">${acctTab === "signup" ? "Email" : "Username or email"}</label><input id="aEmail" type="${acctTab === "signup" ? "email" : "text"}" autocomplete="username" required>
+        ${acctTab === "signin" ? `<span class="hint">Staff: your username. Clients: the email you booked with.</span>` : ""}</div>
       ${acctTab !== "forgot" ? `<div class="field"><label for="aPass">Password</label><input id="aPass" type="password" autocomplete="${acctTab === "signup" ? "new-password" : "current-password"}" required>
         ${acctTab === "signup" ? `<span class="hint">At least 10 characters, with letters and numbers.</span>` : ""}</div>` : ""}
+      ${acctTab === "signin" && needCode ? `<div class="field"><label for="aCode">Six-digit code</label><input id="aCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" required>
+        <span class="hint">From the authenticator app on your phone.</span></div>` : ""}
       <p class="err" id="aErr" hidden></p>
       <button class="btn block" type="submit">${acctTab === "signup" ? "Create account" : acctTab === "forgot" ? "Email me a reset link" : "Sign in"}</button>
-      <p class="hint">${acctTab === "signup" ? "We only use your details for your bookings and orders." : "Your bookings, orders and offers live in your portal."}</p>
+      <p class="hint">${acctTab === "signup" ? "We only use your details for your bookings and orders." : "Staff reach the Operations Hub, clients reach their own portal."}</p>
     </form>`;
+  if (needCode && acctTab === "signin") {
+    const who = $("#aEmail"), pass = $("#aPass");
+    if (who) who.value = acctDraft.who;
+    if (pass) pass.value = acctDraft.pass;
+  }
   if (S.settings.googleClientId) mountGoogle();
 }
 
@@ -435,7 +443,7 @@ document.addEventListener("click", async (e) => {
     if (t.dataset.slot) { pickedSlot = t.dataset.slot; return renderSlots(); }
     if (t.dataset.day) { $("#bDate").value = t.dataset.day; pickedSlot = null; renderDays(); return renderSlots(); }
     if (t.dataset.ful) { ful = t.dataset.ful; return renderCart(); }
-    if (t.dataset.acctTab) { acctTab = t.dataset.acctTab; return renderAccount(); }
+    if (t.dataset.acctTab) { acctTab = t.dataset.acctTab; needCode = false; return renderAccount(); }
 
     switch (action) {
       case "book": if ($("#acctDlg").open) $("#acctDlg").close(); return openBooking(id);
@@ -528,19 +536,52 @@ document.addEventListener("submit", async (e) => {
     const email = $("#aEmail").value.trim();
     try {
       if (acctTab === "forgot") {
-        const r = await busy(btn, "Sending…", () => api("account/forgot", { method: "POST", body: { email } }));
+        const r = await busy(btn, "Sending…", () => api("signin/forgot", { method: "POST", body: { who: email } }));
         toast(r.message);
         acctTab = "signin";
+        needCode = false;
         return renderAccount();
       }
-      const body = { email, password: $("#aPass").value };
-      if (acctTab === "signup") Object.assign(body, { name: $("#aName").value.trim(), phone: $("#aPhone").value.trim() });
-      const r = await busy(btn, acctTab === "signup" ? "Creating…" : "Signing in…", () => api(`account/${acctTab === "signup" ? "signup" : "login"}`, { method: "POST", body }));
+
+      if (acctTab === "signup") {
+        const body = { email, password: $("#aPass").value, name: $("#aName").value.trim(), phone: $("#aPhone").value.trim() };
+        const r = await busy(btn, "Creating…", () => api("account/signup", { method: "POST", body }));
+        S.me = r.me;
+        writeLS(SIGNED_KEY, true);
+        $("#acctDlg").close();
+        renderAcct(); renderCart(); prefillBooking();
+        toast(`Welcome, ${r.me.name}.`);
+        return;
+      }
+
+      // One door for everybody. What they typed decides where they land.
+      const body = { who: email, password: $("#aPass").value };
+      const code = $("#aCode")?.value.trim();
+      if (code) body.code = code;
+      const r = await busy(btn, "Signing in…", () => api("signin", { method: "POST", body }));
+
+      if (r.twoFactorRequired) {
+        needCode = true;
+        acctDraft = { who: email, pass: $("#aPass").value };
+        renderAccount();
+        setTimeout(() => $("#aCode")?.focus(), 30);
+        return;
+      }
+
+      if (r.kind === "staff") {
+        acctDraft = { who: "", pass: "" };
+        toast(`Signed in as ${r.me.name}. Opening the hub…`);
+        location.href = r.go || "/ops";
+        return;
+      }
+
       S.me = r.me;
+      needCode = false;
+      acctDraft = { who: "", pass: "" };
       writeLS(SIGNED_KEY, true);
       $("#acctDlg").close();
       renderAcct(); renderCart(); prefillBooking();
-      toast(acctTab === "signup" ? `Welcome, ${r.me.name}.` : `Signed in as ${r.me.name}.`);
+      toast(`Signed in as ${r.me.name}.`);
     } catch (ex) { err.textContent = ex.message; err.hidden = false; }
     return;
   }
@@ -581,6 +622,15 @@ if ("IntersectionObserver" in window) {
 /* ---------------------------------------------------------------- start */
 renderAll();
 loadCatalog(true).then(() => { if (location.hash === "#book") openBooking(); });
+
+// Arriving from the hub, the old staff address, or the footer: open the one
+// sign-in straight away, and tidy the address bar afterwards.
+if (new URLSearchParams(location.search).has("signin")) {
+  renderAccount();
+  $("#acctDlg").showModal();
+  setTimeout(() => $("#aEmail")?.focus(), 40);
+  try { history.replaceState(null, "", location.pathname + location.hash); } catch {}
+}
 trackVisit();
 if (readLS(SIGNED_KEY)) loadMe(true);
 

@@ -9,7 +9,7 @@ The system has four parts:
 | --- | --- | --- |
 | The shop and booking page | Customers | `/` |
 | Client portal | Customers who sign in | `/portal` |
-| Staff Operations Hub | Your staff | `/ops` (sign in at `/staff`) |
+| Staff Operations Hub | Your staff | `/ops` (sign in on the front page) |
 | The database and files | Nobody opens it directly | Cloudflare D1 and R2 |
 
 ---
@@ -17,8 +17,14 @@ The system has four parts:
 ## 1. The staff accounts that already exist
 
 Thirteen accounts are created with one shared starter password, the one you
-chose when the accounts were set up. Everyone signs in at `/staff` with their
+chose when the accounts were set up. Everyone signs in on the front page with their
 **username** (no email needed).
+
+There is one sign-in for the whole salon. Staff and clients press the same
+**Sign in** button on the front page, and what they type in the first box
+decides where they land: a username such as `owner` opens the Operations Hub,
+an email address opens that client's own portal. Nobody needs a separate
+address to remember, and there is no staff page for a stranger to find.
 
 The starter password is deliberately **not** written in these files, because the
 code is in a public repository. Keep it somewhere private and change it at first
@@ -42,7 +48,7 @@ sign-in.
 
 **Do this first:**
 
-1. Open `/staff` and sign in as `owner` with the starter password.
+1. Open the shop, press **Sign in**, and sign in as `owner` with the starter password.
 2. The hub asks you to choose your own password. Choose one only you know.
 3. Give each member of staff their username and the starter password in person.
 4. Watch the **Employees** page. Anyone still showing "starter password" has not
@@ -63,7 +69,7 @@ The salon is live at these addresses, and it stays up day and night:
 | --- | --- |
 | The shop and booking page | https://www.twinslocsarena.com |
 | Client portal | https://www.twinslocsarena.com/portal |
-| Staff sign in | https://www.twinslocsarena.com/staff |
+| Sign in, staff and clients | https://www.twinslocsarena.com/ then **Sign in** |
 | Operations Hub | https://www.twinslocsarena.com/ops |
 
 `twinslocsarena.com` without the `www` sends people to the same place.
@@ -206,7 +212,7 @@ month and check the profit looks right.
 | What you see | What to do |
 | --- | --- |
 | A member of staff is locked out | They wait a few minutes, or you press **New password** on their row in Employees |
-| Someone forgot their password | They use **Forgot password** on `/staff` (needs email working, section 3) |
+| Someone forgot their password | They use **Forgot password** on the sign-in sheet (needs email working, section 3) |
 | A client says the shop shows an old price | Ask them to refresh. The shop reloads prices every two minutes by itself |
 | An order was paid twice | The system refuses a repeated M-Pesa reference, so check Payments in the books |
 | The AI team says it is not connected | The API key is missing: section 5 |

@@ -1,11 +1,11 @@
-// Staff accounts: first owner setup, sign-in with an optional two-step code,
-// forgotten passwords, and the employee records management keeps.
+// Staff accounts: the one-time owner setup, the signed-in staff member's own
+// password and two-step settings, and the employee records management keeps.
+// Signing in and forgotten passwords are handled for everybody in signin.js.
 
 import { audit, getSettings, ownerExists } from "../lib/db.js";
-import { sendStaffMail } from "../lib/notify.js";
 import { DEPARTMENTS, ROLES, can, capabilitiesFor, requireCap, sectionsFor, strip } from "../lib/perms.js";
 import {
-  STAFF_COOKIE, clearCookie, clearFailures, createSession, destroySession, destroySubjectSessions, hashPassword, issueToken,
+  STAFF_COOKIE, clearCookie, clearFailures, createSession, destroySession, destroySubjectSessions, hashPassword,
   lockoutState, newTotpSecret, noteFailure, passwordProblem, readSession, setCookie, sha256, timingSafeEqual, totpUri,
   touchSession, useToken, verifyPassword, verifyTotp,
 } from "../lib/security.js";
@@ -31,7 +31,7 @@ export async function requireStaff(request, env) {
   return staff;
 }
 
-const publicStaff = (s) => ({
+export const publicStaff = (s) => ({
   id: s.id, name: s.name, email: s.email, phone: s.phone, title: s.title,
   department: s.department, departmentName: DEPARTMENTS[s.department]?.name || s.department,
   role: s.role, roleName: ROLES[s.role] || s.role, mustChange: Boolean(s.must_change),
@@ -42,7 +42,7 @@ const publicStaff = (s) => ({
 const loginKey = async (request, who) => `s:${(await sha256(`${who}|${request.headers.get("cf-connecting-ip") || ""}`)).slice(0, 32)}`;
 
 // Staff may type just their username ("owner") or the whole address.
-async function staffEmail(env, input) {
+export async function staffEmail(env, input) {
   const raw = str(input, 160).trim().toLowerCase();
   if (!raw) return "";
   if (raw.includes("@")) return cleanEmail(raw);
@@ -90,35 +90,8 @@ export async function staffRoutes(parts, request, env, ctx) {
     return json({ me: publicStaff(staff) }, 201, { "Set-Cookie": setCookie(STAFF_COOKIE, token, maxAge, { sameSite: "Strict" }) });
   }
 
-  /* ------------------------------------------------------------ sign in */
-  if (action === "login" && method === "POST") {
-    const body = await readJson(request);
-    const email = await staffEmail(env, body.email);
-    const key = await loginKey(request, email || "unknown");
-    const lock = await lockoutState(env.DB, key);
-    if (lock.locked) return fail(429, "This account is locked for a few minutes after too many wrong tries.");
-
-    const staff = email ? await env.DB.prepare("SELECT * FROM employees WHERE email = ?1").bind(email).first() : null;
-    const ok = staff && staff.status === "active" && (await verifyPassword(String(body.password || ""), staff.password_hash));
-    if (!ok) {
-      const { fails } = await noteFailure(env.DB, key);
-      await audit(env.DB, { actor: { type: "staff", name: email || "unknown" }, action: "staff.login_failed", detail: `attempt ${fails}` });
-      return fail(401, "That email and password don’t match.");
-    }
-    if (staff.totp_enabled) {
-      const code = str(body.code, 10);
-      if (!code) return json({ twoFactorRequired: true });
-      if (!(await verifyTotp(staff.totp_secret, code))) {
-        await noteFailure(env.DB, key);
-        return fail(401, "That six-digit code isn’t right. Check your authenticator app.");
-      }
-    }
-    await clearFailures(env.DB, key);
-    const { token, maxAge } = await createSession(env.DB, { subjectType: "staff", subjectId: staff.id, request, twoFactorOk: 1 });
-    await env.DB.prepare("UPDATE employees SET last_login_at = datetime('now') WHERE id = ?1").bind(staff.id).run();
-    await audit(env.DB, { actor: { type: "staff", id: staff.id, name: staff.name }, action: "staff.login" });
-    return json({ me: publicStaff(staff) }, 200, { "Set-Cookie": setCookie(STAFF_COOKIE, token, maxAge, { sameSite: "Strict" }) });
-  }
+  // Signing in happens once, for everybody, at POST /api/signin. There is no
+  // separate staff door any more: the username decides which room opens.
 
   if (action === "logout" && method === "POST") {
     const staff = await currentStaff(request, env, { requireTwoFactor: false });
@@ -155,25 +128,6 @@ export async function staffRoutes(parts, request, env, ctx) {
     await env.DB.prepare("UPDATE employees SET terms_accepted_at = datetime('now') WHERE id = ?1").bind(staff.id).run();
     await audit(env.DB, { actor: { type: "staff", id: staff.id, name: staff.name }, action: "staff.accepted_terms" });
     return json({ ok: true });
-  }
-
-  if (action === "forgot" && method === "POST") {
-    const body = await readJson(request);
-    const email = await staffEmail(env, body.email);
-    const staff = email ? await env.DB.prepare("SELECT * FROM employees WHERE email = ?1 AND status = 'active'").bind(email).first() : null;
-    if (staff) {
-      const token = await issueToken(env.DB, { kind: "reset", subjectType: "staff", subjectId: staff.id, minutes: 30 });
-      const link = `${new URL(request.url).origin}/staff-reset?token=${token}`;
-      ctx?.waitUntil?.(sendStaffMail(env, {
-        to: staff.email,
-        subject: "Reset your Twins Locs Arena staff password",
-        heading: "Set a new staff password",
-        lines: ["Someone asked to reset the password for your staff account.", "This link works once and expires in 30 minutes. If this wasn’t you, tell management - your account may be targeted."],
-        action: { label: "Choose a new password", url: link },
-      }));
-      await audit(env.DB, { actor: { type: "staff", id: staff.id, name: staff.name }, action: "staff.reset_requested" });
-    }
-    return json({ ok: true, message: "If that staff email exists, a reset link is on its way." });
   }
 
   if (action === "reset" && method === "POST") {

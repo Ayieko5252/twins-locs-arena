@@ -19,7 +19,7 @@ export async function currentCustomer(request, env) {
   return { ...customer, sessionId: session.id };
 }
 
-const publicMe = (c) => ({
+export const publicMe = (c) => ({
   name: c.name, email: c.email || "", phone: c.phone || "", picture: c.picture || "",
   hasPassword: Boolean(c.password_hash), google: Boolean(c.google_sub), marketing: Boolean(c.marketing_opt_in),
 });

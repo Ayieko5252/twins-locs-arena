@@ -20,7 +20,7 @@
       <span class="hint">At least 10 characters, with letters and numbers.</span></div>
     <div class="field"><label for="pass2">Type it again</label><input id="pass2" type="password" autocomplete="new-password" required></div>
     <button class="btn block" type="submit">Save new password</button>
-    <a class="hint" href="/staff" style="text-align:center">Back to sign in</a>
+    <a class="hint" href="/?signin=1" style="text-align:center">Back to sign in</a>
   </form>
 </main>
 <script nonce="__NONCE__">
@@ -44,7 +44,7 @@ $("#form").addEventListener("submit", async (e) => {
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.error || "That didn’t work.");
-    location.href = "/staff";
+    location.href = "/?signin=1";
   } catch (ex) {
     err.textContent = ex.message; err.hidden = false;
     btn.disabled = false; btn.textContent = "Save new password";

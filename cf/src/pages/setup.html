@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Set up the owner · Twins Locs Arena</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0C0C0A">
+<link rel="icon" href="/mark.png" type="image/png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Figtree:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="/brand.css">
+</head>
+<body>
+<main class="auth">
+  <div class="auth-card">
+    <div class="auth-brand">
+      <img src="/logo.webp" alt="Twins Locs Arena" width="104" height="104" style="border-radius:50%">
+      <div>
+        <span class="eyebrow">Twins Locs Arena</span>
+        <h1 id="title">Set up the owner</h1>
+      </div>
+    </div>
+
+    <p class="hint" id="lead">This is the very first sign-in for this salon. It happens once.</p>
+    <p class="err" id="err" hidden></p>
+
+    <form id="setupForm" class="stack" novalidate>
+      <div class="notice">
+        <strong>First-time setup</strong>
+        <span class="hint">Nobody has claimed the owner account yet. You need the setup code that was stored on the server.</span>
+      </div>
+      <div class="field"><label for="sName">Your name</label><input id="sName" autocomplete="name" required></div>
+      <div class="field"><label for="sEmail">Your email</label><input id="sEmail" type="email" autocomplete="username" required></div>
+      <div class="field"><label for="sPhone">Phone</label><input id="sPhone" type="tel" inputmode="tel" autocomplete="tel"></div>
+      <div class="field"><label for="sCode">Setup code</label><input id="sCode" autocomplete="off" required></div>
+      <div class="field"><label for="sPass">Choose a password</label><input id="sPass" type="password" autocomplete="new-password" required>
+        <span class="hint">At least 10 characters, with letters and numbers.</span></div>
+      <button class="btn block" type="submit">Create the owner account</button>
+      <a class="hint" href="/" style="text-align:center">Back to the shop</a>
+    </form>
+  </div>
+</main>
+<div class="toast" id="toast" hidden role="status"></div>
+
+<script nonce="__NONCE__">
+(() => {
+const $ = (s) => document.querySelector(s);
+const api = async (path, body) => {
+  const res = await fetch(path, {
+    method: body ? "POST" : "GET",
+    headers: { "Content-Type": "application/json", "X-TLA-App": "1" },
+    credentials: "same-origin",
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || `Something went wrong (${res.status}).`);
+  return data;
+};
+const showError = (msg) => { const e = $("#err"); e.textContent = msg; e.hidden = !msg; };
+
+// If the owner already exists there is nothing to do here. Everybody,
+// staff and clients alike, signs in on the front page.
+(async () => {
+  try {
+    const { needed } = await api("/api/staff/setup");
+    if (!needed) location.replace("/?signin=1");
+  } catch (e) { showError(e.message); }
+})();
+
+$("#setupForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  showError("");
+  const btn = e.target.querySelector("button");
+  btn.disabled = true; btn.textContent = "Creating…";
+  try {
+    await api("/api/staff/setup", {
+      name: $("#sName").value.trim(), email: $("#sEmail").value.trim(), phone: $("#sPhone").value.trim(),
+      code: $("#sCode").value.trim(), password: $("#sPass").value,
+    });
+    location.href = "/ops";
+  } catch (err) { showError(err.message); btn.disabled = false; btn.textContent = "Create the owner account"; }
+});
+})();
+</script>
+<script src="/eye.js" nonce="__NONCE__" defer></script>
+</body>
+</html>

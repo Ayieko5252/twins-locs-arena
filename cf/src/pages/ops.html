@@ -115,7 +115,7 @@ async function api(path, { method = "GET", body } = {}) {
     credentials: "same-origin",
     body: body ? JSON.stringify(body) : undefined,
   });
-  if (res.status === 401) { location.href = "/staff"; throw new Error("Signed out"); }
+  if (res.status === 401) { location.href = "/?signin=1"; throw new Error("Signed out"); }
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.error || `Something went wrong (${res.status}).`);
   return data;
@@ -203,7 +203,7 @@ const fileToDataUrl = (file, max = 1100) => new Promise((res, rej) => {
 /* ---------------------------------------------------------------- shell */
 async function boot() {
   const me = await api("staff/me");
-  if (!me.me) { location.href = "/staff"; return; }
+  if (!me.me) { location.href = "/?signin=1"; return; }
   S.me = me.me; S.currency = me.currency || "KSh"; S.departments = me.departments || {};
   const dept = S.departments[S.me.department] || {};
   $("#who").innerHTML = `<b>${esc(S.me.name)}</b><span>${esc(S.me.title || S.me.roleName)}</span>
@@ -487,7 +487,7 @@ VIEWS.staff = async (main) => {
   const d = await api("staff/employees");
   S.data.employees = d.employees;
   main.innerHTML = header("Employees", `${can("staff.edit") ? `<button class="btn gold sm" data-act="new-employee">Add employee</button>` : ""}`) + `
-    <p class="hint">Everyone signs in at <strong>/staff</strong> with their username and their own password. New accounts start with a one-time password that must be changed.</p>
+    <p class="hint">Everyone signs in on the front page, staff and clients alike, with the one <strong>Sign in</strong> button. Staff type their username, clients type their email, and the hub opens by itself for staff. New accounts start with a one-time password that must be changed.</p>
     <div class="tbl-wrap"><table class="t-cards"><thead><tr><th>Name</th><th>Username</th><th>Department</th><th>Role</th>${can("staff.pay") ? "<th class='r'>Pay rate</th>" : ""}<th>Two-step</th><th>Status</th><th></th></tr></thead><tbody>
     ${d.employees.map((e) => `<tr>
       <td data-l="Name">${esc(e.name)}<span class="sub">${esc(e.title || "")}</span></td>
@@ -747,7 +747,7 @@ document.addEventListener("click", async (e) => {
     switch (act) {
       case "reload": return render(S.section);
       case "close-dlg": return $("#dlg").close();
-      case "signout": await api("staff/logout", { method: "POST" }); location.href = "/staff"; return;
+      case "signout": await api("staff/logout", { method: "POST" }); location.href = "/"; return;
       case "apply-range": S.data.from = $("#rFrom").value; S.data.to = $("#rTo").value; return render(S.section);
       case "range-month": { const d = new Date(); S.data.from = `${d.toISOString().slice(0, 8)}01`; S.data.to = today(); return render(S.section); }
       case "client-search": return;

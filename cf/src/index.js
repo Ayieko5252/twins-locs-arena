@@ -8,6 +8,7 @@ import { can } from "./lib/perms.js";
 import { currentStaff } from "./routes/staff.js";
 import { publicRoutes } from "./routes/public.js";
 import { customerRoutes } from "./routes/customer.js";
+import { signinRoutes } from "./routes/signin.js";
 import { staffRoutes } from "./routes/staff.js";
 import { opsRoutes } from "./routes/ops.js";
 import { agentRoutes } from "./routes/agents.js";
@@ -39,6 +40,7 @@ export default {
         const parts = path.slice(API_PREFIX.length).split("/").filter(Boolean);
         const res =
           (await publicRoutes(parts, request, env, ctx)) ||
+          (await signinRoutes(parts, request, env, ctx)) ||
           (await customerRoutes(parts, request, env, ctx)) ||
           (await staffRoutes(parts, request, env, ctx)) ||
           (await opsRoutes(parts, request, env, ctx)) ||
